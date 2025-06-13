@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthOptions, User } from "next-auth"
 import Google from "next-auth/providers/google"
 
 /* Connecting to MongoDB */
@@ -23,7 +23,7 @@ async function run() {
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    await client.close();
+
   }
 }
 run().catch(console.dir);
@@ -34,7 +34,7 @@ interface Account {
 }
 
 
-const authOptions = {
+const authOptions: AuthOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_ID!,
@@ -42,19 +42,27 @@ const authOptions = {
     })
   ],
   callbacks: {
-    async signIn({user, account}) {
+    async signIn({user, account}: {user: User; account: Account | null}) {
+      const db = client.db("Users")
+      const EndusersCollection = await db.collection("Endusers")
 
+      const existingUser = await EndusersCollection.findOne({oauthId: account?.providerAccountId})
+
+      if (!existingUser) {
+        console.log("No existing user")
+        await EndusersCollection.insertOne({
+          oauthId: account?.providerAccountId,
+          email: user.email,
+          name: user.name,
+          image: user.image
+        })
+      }
+
+      return true
     }
   }
 }
 
-const handler = NextAuth({
-  providers:[
-    Google({
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!
-    })
-  ]
-})
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
