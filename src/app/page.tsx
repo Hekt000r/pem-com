@@ -5,13 +5,7 @@ import { redirect } from "next/navigation";
 
 
 export default function Home() {
-  const {data: session, status} = useSession({
-    required: true,
-    onUnauthenticated() {
-      redirect("/login")
-    },
-    
-  })
+  const {data: session, status} = useSession()
  
-  return <>Nje moment.. {redirect("/home")}</>;
+  return <>Nje moment.. {status === "authenticated" ? redirect("/home") : redirect("/login")} </>;
 }
