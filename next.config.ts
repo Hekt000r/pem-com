@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
+    images: {
+    domains: ['lh3.googleusercontent.com'], // for Google profile pics
+  },
 };
 
 export default nextConfig;

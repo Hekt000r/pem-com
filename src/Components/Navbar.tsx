@@ -1,7 +1,11 @@
+import { useSession } from "next-auth/react";
 import { FaHome } from "react-icons/fa";
 import { FaAddressCard, FaBriefcase } from "react-icons/fa6";
-
+import Image from "next/image";
+import { IoPersonCircle } from "react-icons/io5";
 export default function Navbar() {
+  const { data: session, status } = useSession();
+
   return (
     <div className="h-14 flex shadow-xl">
       <div className="h-12 flex w-full m-1 p-1">
@@ -24,6 +28,26 @@ export default function Navbar() {
               <FaBriefcase className="m-2 text-xl" /> Kompanitë
             </h1>
           </button>
+        </div>
+        <div className="flex h-10 w-full justify-end items-center mr-[15%]">
+          {session ? (
+            <div className="flex">
+              <button className="h-10 btn btn-ghost p-1 flex ml-2 mr-2">
+                <h1 className="justify-center h-12 flex items-center mr-2">
+                  <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Profili im
+                </h1>
+              </button>
+              <button className="w-10 h-10 btn btn-ghost rounded-full overflow-hidden p-0.5">
+                <Image
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover rounded-full"
+                  src={session?.user?.image!}
+                  alt="User"
+                />
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
