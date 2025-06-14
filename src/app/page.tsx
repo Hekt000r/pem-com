@@ -1,12 +1,17 @@
 "use client"
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { useEffect } from "react";
+
 
 export default function Home() {
-  useEffect(() => {
-    redirect("/login")
-  }, [])
-  return <SessionProvider><div>Loading</div></SessionProvider>;
+  const {data: session, status} = useSession({
+    required: true,
+    onUnauthenticated() {
+      redirect("/login")
+    },
+    
+  })
+ 
+  return <>Nje moment.. {redirect("/home")}</>;
 }

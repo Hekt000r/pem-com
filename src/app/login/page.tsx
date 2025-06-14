@@ -3,25 +3,14 @@ import { SessionProvider } from "next-auth/react";
 import { FaGoogle } from "react-icons/fa";
 
 import { useSession, signIn, signOut } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function Login() {
   const { data: session } = useSession();
 
   return (
     <SessionProvider>
-      {session ? (
-        <div>
-          <h1>Hello</h1>
-          <div>Signed in as {session.user?.email}</div>
-          <button
-            onClick={() => {
-              signOut();
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-      ) : (
+      {session ? redirect("/home") : (
         <div className="flex justify-center items-center h-screen bg-slate-100">
           <div className="shadow-2xl w-[35%] h-[70%] rounded-2xl bg-white border-black">
             <div className="m-4 mt-8 flex flex-col items-center justify-center">
