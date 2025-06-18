@@ -51,7 +51,31 @@ export default function Jobs() {
 
     fetchJobs();
   }, []);
+const [loading, setLoading] = useState(true);
 
+useEffect(() => {
+  const fetchJobs = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/getJobs");
+      setJobs(response.data);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchJobs();
+}, []);
+
+if (loading) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <span className="loading loading-spinner loading-lg text-primary mb-4"></span>
+      <span className="text-lg font-medium">Një moment...</span>
+    </div>
+  );
+}
   return (
     <div className="mt-8 bg-white m-4  flex flex-row flex-wrap">
       <link
