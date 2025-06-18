@@ -123,9 +123,9 @@ if (loading) {
               </h2>
             </div>
           </div>
-          <button className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded">
+          <a href={`/job/${job.company_id}`} className="w-full text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded">
             Më shumë
-          </button>
+          </a>
         </div>
       ))}
     </div>
