@@ -32,7 +32,7 @@ export default function Home() {
 
     return (
         <div>
-            <Navbar />
+            <Navbar page="home" />
             <Jobs />
         </div>
     )

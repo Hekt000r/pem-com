@@ -83,7 +83,7 @@ export default function Jobs() {
                 {job.Location}
               </h2>
             </div>
-            <div className="mt-1 ml-1">
+            <div className="mt-1 ml-0.5">
               <h2
                 style={{ color: "rgb(107, 114, 128)" }}
                 className="font-montserrat flex items-center text-sm"
