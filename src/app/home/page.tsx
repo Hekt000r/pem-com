@@ -23,7 +23,7 @@ export default function Home() {
                     const user = res.data
                     setUserData(user)
 
-                    if (!user?.profile) {
+                    if (user.hasProfile == false) {
                         redirect("/finishProfile")
                     }
                 })

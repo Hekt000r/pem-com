@@ -3,8 +3,9 @@
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import "./page.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaDoorOpen } from "react-icons/fa6";
+import axios from "axios";
 
 export default function FinishProfile() {
   const { data: session, status } = useSession({
@@ -20,6 +21,45 @@ export default function FinishProfile() {
   const [cv, setCV] = useState<File | null>(null);
   const [birthday, setBirthday] = useState("");
   const [age, setAge] = useState("");
+
+
+  useEffect(() => {
+        if (status === "authenticated" && session?.user?.oauthId) {
+            axios
+                .get(`/api/getUserByOauthId?oauthid=${session.user.oauthId}`)
+                .then((res) => {
+                    const user = res.data
+                    if (user.hasProfile == true) {
+                        redirect("/home")
+                    }
+                })
+        }
+    }, [status, session])
+
+
+  const handleSubmit = async () => {
+    if (!firstName || !surName || !age || !birthday) {
+      alert("Të lutëm plotëso të gjitha fushat të domosdoshme") /* Please fill out all the required fields */
+      return;
+    }
+    const formData = new FormData()
+    formData.append("oauthid", session?.user?.oauthId!)
+    formData.append("profileData", JSON.stringify({firstName,surName,address,birthday,age}))
+    if (cv) {
+      formData.append("file", cv)
+    }
+    
+    const res = await axios.post("/api/createUserProfile", formData);
+
+ 
+    if (res.status === 200) {
+      alert("Profili u krijua me sukses!")
+      redirect("/home")
+    } else{
+      alert(`Error: ${res.data.error}`)
+    }
+  }
+
 
   return (
     <SessionProvider>
@@ -125,7 +165,7 @@ export default function FinishProfile() {
 
               <div className="absolute bottom-4 right-4">
                 <button onClick={()=>{
-
+                  handleSubmit()
                 }} className="btn btn-primary">Përfundo</button>
               </div>
             </div>
