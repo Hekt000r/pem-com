@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.2.6",
-    "@next/font": "^14.2.15",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
     "axios": "^1.10.0",
