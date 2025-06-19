@@ -56,7 +56,7 @@ const [loading, setLoading] = useState(true);
 useEffect(() => {
   const fetchJobs = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/getJobs");
+      const response = await axios.get("/api/getJobs");
       setJobs(response.data);
     } catch (error) {
       console.error("Error fetching jobs:", error);

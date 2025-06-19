@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     images: {
     domains: ['lh3.googleusercontent.com'], // for Google profile pics
   },
+
 };
 
 export default nextConfig;
