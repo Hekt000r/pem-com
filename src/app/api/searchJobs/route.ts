@@ -8,7 +8,7 @@ import { connectToDatabase } from "@/utils/mongodb";
 import { Collection } from "mongodb";
 import { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, res: Response) {
+export async function GET(req: NextRequest) {
   const { db } = await connectToDatabase("Jobs");
   const JobsCollection: Collection = db.collection("Standard");
 
