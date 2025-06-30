@@ -16,7 +16,6 @@ interface CompanyAdminNavbarProps {
 }
 
 export default function CompanyAdminNavbar({
-  imgURL,
   company,
 }: CompanyAdminNavbarProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -32,7 +31,7 @@ export default function CompanyAdminNavbar({
         <div className="flex p-1.5 ml-1 h-16 items-center">
           <img
             className="rounded-md w-12 h-12 cursor-pointer hover:brightness-80 transition"
-            src={imgURL}
+            src={company.imgURL}
             alt=""
           />
           <h1 className="ml-2 font-montserrat font-semibold">

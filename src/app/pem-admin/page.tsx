@@ -184,7 +184,7 @@ export default function Page() {
               <div className="flex items-center">
                 <FaGraduationCap className="w-8 h-8 mr-2" />{" "}
                 <h1 className="text-xl font-montserrat font-medium">
-                  Guides
+                  Tutorials
                 </h1>
               </div>
               <h2 className="opacity-70">Udhëzime nga ekipi i Punë e mbarë</h2>
