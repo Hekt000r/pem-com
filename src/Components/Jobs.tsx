@@ -11,7 +11,7 @@ interface Job {
   company_displayName: string;
   Location: string;
   city: string;
-  latlong: Array<string> /* Latitude | Longtitude numbers are stored as strings with decimals */;
+  latlong: Array<string>;
   thumbnail: string;
   createdAt: string;
   salary: string;
@@ -37,47 +37,62 @@ function getTimeAgo(dateString: string): string {
   return "Tani";
 }
 
-export default function Jobs() {
-  const [jobs, setJobs] = useState([]);
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/getJobs");
-        setJobs(response.data);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
-
-    fetchJobs();
-  }, []);
-const [loading, setLoading] = useState(true);
-
-useEffect(() => {
-  const fetchJobs = async () => {
-    try {
-      const response = await axios.get("/api/getJobs");
-      setJobs(response.data);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchJobs();
-}, []);
-
-if (loading) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <span className="loading loading-spinner loading-lg text-primary mb-4"></span>
-      <span className="text-lg font-medium">Një moment...</span>
-    </div>
-  );
+interface JobsProps {
+  Jobs?: Job[];
 }
+
+export default function Jobs({ Jobs: jobsProp }: JobsProps) {
+  const [jobs, setJobs] = useState<Job[]>(jobsProp ?? []);
+  const [loading, setLoading] = useState(!jobsProp);
+
+   useEffect(() => {
+    if (jobsProp) {
+      setJobs(jobsProp);
+      setLoading(false);
+      if (!jobsProp || jobsProp.length === 0) {
+        setLoading(true);
+        const fetchJobs = async () => {
+          try {
+        const response = await axios.get("/api/getJobs");
+        setJobs(response.data);
+          } catch (error) {
+        console.error("Error fetching jobs:", error);
+          } finally {
+        setLoading(false);
+          }
+        };
+        fetchJobs();
+      }
+    }
+  }, [jobsProp]);
+
+  useEffect(() => {
+    if (!jobsProp) {
+      const fetchJobs = async () => {
+        try {
+          const response = await axios.get("/api/getJobs");
+          setJobs(response.data);
+        } catch (error) {
+          console.error("Error fetching jobs:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchJobs();
+    }
+  }, [jobsProp]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <span className="loading loading-spinner loading-lg text-primary mb-4"></span>
+        <span className="text-lg font-medium">Një moment...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-8 bg-white m-4  flex flex-row flex-wrap">
+    <div className="mt-8 bg-white m-4 flex flex-row flex-wrap">
       <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Roboto&display=swap"
         rel="stylesheet"
@@ -123,7 +138,10 @@ if (loading) {
               </h2>
             </div>
           </div>
-          <a href={`/job/${job.company_id}`} className="w-full text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded">
+          <a
+            href={`/job/${job.company_id}`}
+            className="w-full text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded"
+          >
             Më shumë
           </a>
         </div>

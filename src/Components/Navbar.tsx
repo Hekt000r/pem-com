@@ -1,3 +1,4 @@
+"use client"
 import { signOut, useSession } from "next-auth/react";
 import { FaHome } from "react-icons/fa";
 import {
@@ -30,16 +31,16 @@ export default function Navbar({ page }: NavbarProps) {
             <img src="./Logo1.svg" className="h-10" alt="" />
           </button>
           <div className="flex h-10 w-full justify-center items-center mr-[15%]">
-            <button className={getBtnClass("home")}>
+            <a href="/home" className={getBtnClass("home")}>
               <h1 className="justify-center h-12 flex items-center mr-2">
                 <FaHome className="m-2 text-xl" /> Ballina
               </h1>
-            </button>
-            <button className={getBtnClass("jobs") + " ml-2"}>
+            </a>
+            <a href="/jobs" className={getBtnClass("jobs") + " ml-2"}>
               <h1 className="justify-center h-12 flex items-center mr-2">
                 <FaAddressCard className="m-2 text-xl" /> Punët
               </h1>
-            </button>
+            </a>
             <button className={getBtnClass("companies") + " ml-2"}>
               <h1 className="justify-center h-12 flex items-center mr-2">
                 <FaBriefcase className="m-2 text-xl" /> Kompanitë
