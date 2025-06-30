@@ -15,11 +15,7 @@ export default function Home() {
     );
   }
 
-  if (status === "authenticated") {
-    redirect("/home");
-    return null;
-  }
 
-  redirect("/login");
+  redirect("/home");
   return null;
 }

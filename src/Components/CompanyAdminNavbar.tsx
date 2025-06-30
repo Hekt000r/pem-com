@@ -81,7 +81,7 @@ export default function CompanyAdminNavbar({
                 </button>
                 <button
                   onClick={() => {
-                    signOut();
+                    signOut({ callbackUrl: "/" });
                   }}
                   className="w-[90%] btn btn-error rounded-xl p-1 mt-2 h-10 justify-center mr-2 pr-2 flex items-center"
                 >

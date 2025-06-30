@@ -90,7 +90,11 @@ export default function Navbar({ page }: NavbarProps) {
                   </button>
                 </div>
                 </div>
-            ) : null}
+            ) : (
+              <a href="/login" className="py-2 px-6 rounded-lg cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+                Kyçu
+              </a>
+            )}
           </div>
         </div>
       </div>

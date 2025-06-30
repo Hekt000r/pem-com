@@ -5,15 +5,11 @@ import { redirect } from "next/navigation"
 import Jobs from "@/Components/Jobs"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import Hero from "@/Components/Hero"
 
 export default function Home() {
     const [userData, setUserData] = useState<any>(null)
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            redirect("/login")
-        },
-    })
+    const { data: session, status } = useSession()
 
     useEffect(() => {
         if (status === "authenticated" && session?.user?.oauthId) {
@@ -33,7 +29,7 @@ export default function Home() {
     return (
         <div>
             <Navbar page="home" />
-            <Jobs />
+            {status === "authenticated" ? (<Jobs />): (<Hero/>)}
         </div>
     )
 }
