@@ -28,7 +28,7 @@ export default function Navbar({ page }: NavbarProps) {
       <div className="h-14 flex shadow-xl bg-white">
         <div className="h-12 flex w-full m-1 p-1">
           <button className="h-10 btn btn-ghost p-1 flex">
-            <img src="./Logo1.svg" className="h-10" alt="" />
+            <img src="/Logo1.svg" className="h-10" alt="" />
           </button>
           <div className="flex h-10 w-full justify-center items-center mr-[15%]">
             <a href="/home" className={getBtnClass("home")}>

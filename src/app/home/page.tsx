@@ -2,10 +2,10 @@
 import { useSession } from "next-auth/react"
 import Navbar from "@/Components/Navbar"
 import { redirect } from "next/navigation"
-import Jobs from "@/Components/Jobs"
 import { useEffect, useState } from "react"
 import axios from "axios"
 import Hero from "@/Components/Hero"
+import Jobs from "@/Components/Jobs"
 
 export default function Home() {
     const [userData, setUserData] = useState<any>(null)
@@ -29,7 +29,7 @@ export default function Home() {
     return (
         <div>
             <Navbar page="home" />
-            {status === "authenticated" ? (<Jobs />): (<Hero/>)}
+            {status === "authenticated" ? (<Jobs/>): (<Hero/>)}
         </div>
     )
 }

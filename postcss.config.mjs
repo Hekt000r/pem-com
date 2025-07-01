@@ -10,7 +10,10 @@ const config = {
       },
     },
   },
-  plugins: ["@tailwindcss/postcss"],
+  plugins: [
+    require('@tailwindcss/typography'),
+    "@tailwindcss/postcss",
+  ],
 };
 
 export default config;
