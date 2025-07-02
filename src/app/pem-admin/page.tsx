@@ -17,11 +17,13 @@ interface Company {
   imgURL: string;
 }
 
+
 export default function Page() {
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState<Company>();
   const router = useRouter();
   const { data: session } = useSession();
+
   useEffect(() => {
     const checkAdmin = async () => {
       if (!session || !session.user || !session.user.oauthId) {

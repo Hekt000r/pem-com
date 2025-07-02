@@ -19,7 +19,7 @@ import Markdown from "react-markdown";
 import { HiMiniBuildingOffice2 } from "react-icons/hi2";
 import { TbMessageCircleFilled } from "react-icons/tb";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-
+import remarkGfm from "remark-gfm";
 export default function Page() {
   const { data: session, status } = useSession();
 
@@ -250,7 +250,7 @@ export default function Page() {
             <hr className="border-t border-gray-300 my-4" />
 
             <div className="markdown m-8 p-2">
-              <Markdown>{description}</Markdown>
+              <Markdown remarkPlugins={[remarkGfm]}>{description}</Markdown>
             </div>
 
             <hr className="border-t border-gray-300 my-4" />
@@ -286,12 +286,13 @@ export default function Page() {
               const jobData = {
                 title,
                 city,
-                location,
+                Location: location,
                 salary,
                 description,
                 company_displayName: company?.displayName,
                 thumbnail: company?.imgURL,
-                company_id: company?._id,
+                  company_id: company?._id,
+                  createdAt: new Date()
               };
               try {
                 console.table(jobData);
@@ -301,7 +302,7 @@ export default function Page() {
                   )}`
                 );
                 alert("Postimi u krijua me sukses!");
-                redirect("/dashboard");
+                window.location.replace("/pem-admin")
               } catch (error) {
                 if (isRedirectError(error)) {
                   return;

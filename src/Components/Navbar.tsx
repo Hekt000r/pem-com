@@ -11,16 +11,17 @@ import {
 import Image from "next/image";
 import { IoPersonCircle } from "react-icons/io5";
 import { useState } from "react";
+import { TbMessageCircleFilled } from "react-icons/tb";
 
 type NavbarProps = {
-  page: "home" | "jobs" | "companies";
+  page: "home" | "jobs" | "companies" | "chats";
 };
 
 export default function Navbar({ page }: NavbarProps) {
   const { data: session, status } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
-  const getBtnClass = (btn: "home" | "jobs" | "companies") =>
+  const getBtnClass = (btn: "home" | "jobs" | "companies" | "chats") =>
     `h-10 btn btn-ghost p-1 flex${page === btn ? " text-green-700 bg-green-100 font-bold" : ""}`;
 
   return (
@@ -30,7 +31,7 @@ export default function Navbar({ page }: NavbarProps) {
           <button className="h-10 btn btn-ghost p-1 flex">
             <img src="/Logo1.svg" className="h-10" alt="" />
           </button>
-          <div className="flex h-10 w-full justify-center items-center mr-[15%]">
+          <div className="flex h-10 ml-3 w-full justify-center items-center mr-[15%]">
             <a href="/home" className={getBtnClass("home")}>
               <h1 className="justify-center h-12 flex items-center mr-2">
                 <FaHome className="m-2 text-xl" /> Ballina
@@ -46,6 +47,11 @@ export default function Navbar({ page }: NavbarProps) {
                 <FaBriefcase className="m-2 text-xl" /> Kompanitë
               </h1>
             </button>
+             <a href="/chats" className={getBtnClass("chats") + " ml-2"}>
+              <h1 className="justify-center h-12 flex items-center mr-2">
+                <TbMessageCircleFilled className="m-2 text-xl" /> Bisedimet
+              </h1>
+            </a>
           </div>
 
           <div className="flex h-10 w-full justify-end items-center mr-[15%]">
