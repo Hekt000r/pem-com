@@ -1,12 +1,7 @@
-// tailwind.config.js
-
-import typography from '@tailwindcss/typography';
-import postcss from '@tailwindcss/postcss';
-
 /** @type {import('tailwindcss').Config} */
 const config = {
   content: [
-    "./src/**/*.{ts,tsx,js,jsx}",
+    "./src/**/*.{ts,tsx,js,jsx}", // adjust path if needed
   ],
   theme: {
     extend: {
@@ -16,8 +11,8 @@ const config = {
     },
   },
   plugins: [
-    typography,
-    postcss,
+    require('@tailwindcss/typography'),
+    "@tailwindcss/postcss",
   ],
 };
 
