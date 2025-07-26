@@ -1,6 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-const typography = require('@tailwindcss/typography');
-
 const config = {
   content: [
     "./src/**/*.{ts,tsx,js,jsx}", // adjust path if needed
@@ -13,8 +11,9 @@ const config = {
     },
   },
   plugins: [
-    typography
+    require('@tailwindcss/typography'),
+    "@tailwindcss/postcss",
   ],
 };
 
-module.exports = config;
+export default config;
