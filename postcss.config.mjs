@@ -1,7 +1,9 @@
-/** @type {import('tailwindcss').Config} */
-const config = {
+import typography from '@tailwindcss/typography';
+// Note: "@tailwindcss/postcss" does not exist as a plugin — it should be removed.
+
+export default {
   content: [
-    "./src/**/*.{ts,tsx,js,jsx}", // adjust path if needed
+    "./src/**/*.{ts,tsx,js,jsx}",
   ],
   theme: {
     extend: {
@@ -11,9 +13,7 @@ const config = {
     },
   },
   plugins: [
-    require('@tailwindcss/typography'),
-    "@tailwindcss/postcss",
+    typography,
+    // remove "@tailwindcss/postcss" – it’s not a valid plugin
   ],
 };
-
-export default config;

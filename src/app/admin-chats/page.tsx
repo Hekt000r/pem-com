@@ -11,6 +11,7 @@ import Loading from "../loading";
 import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
 import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 type Message = {
   _id: string;
@@ -47,10 +48,36 @@ export default function Page() {
   const [users, setUsers] = useState<Record<string, User>>({});
   const [enteredMessage, setEnteredMessage] = useState<string>("");
   const [company, setCompany] = useState<Company | null>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
   const pusherRef = useRef<Pusher | null>(null);
   const [profiles, setProfiles] = useState<
     Record<string, { firstName: string; surname: string }>
   >({});
+
+  const [active, setActive] = useState(false); // whether or not the emoji picker is currently open
+
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setEnteredMessage((prev) => prev + emojiData.emoji);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node)
+      ) {
+        setActive(false);
+      }
+    }
+    if (active) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [active]);
 
   // Fetch logged-in-company info
   useEffect(() => {
@@ -246,9 +273,33 @@ export default function Page() {
               value={enteredMessage}
               onChange={(e) => setEnteredMessage(e.target.value)}
             />
-            <button className="btn btn-ghost px-2">
+            <button
+              onClick={() => {
+                if (active == false) {
+                  setActive(true);
+                } else {
+                  setActive(false);
+                }
+              }}
+              className="btn btn-ghost px-2"
+            >
               <FaRegSmile className="w-5 h-5" />
             </button>
+
+            {active && (
+              <div
+                ref={emojiPickerRef}
+                style={{
+                  position: "absolute",
+                  bottom: "80px",
+                  right: "20px",
+                  zIndex: 999,
+                }}
+              >
+                <EmojiPicker emojiStyle="native" onEmojiClick={onEmojiClick} />
+              </div>
+            )}
+
             <button className="btn btn-ghost px-2">
               <FaLink className="w-5 h-5" />
             </button>
