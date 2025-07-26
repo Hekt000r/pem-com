@@ -1,26 +1,18 @@
-/*****************
- * /api/getOtherConversationMembers
- * Gets the conversation member that ISN'T the one specified
- * params: oid (OAuth ID), convoID (conversation _id)
- ****************/
-
 import { connectToDatabase } from "@/utils/mongodb";
-import { UserFromOID } from "@/utils/UserFromOID";
 import { ObjectId } from "mongodb";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const oid = req.nextUrl.searchParams.get("oid");
+  const companyId = req.nextUrl.searchParams.get("companyId");
   const convoID = req.nextUrl.searchParams.get("convoID");
 
-  if (!oid || !convoID) {
+  if (!companyId || !convoID) {
     return Response.json(
-      { status: 400, message: "Missing oid or convoID" },
+      { status: 400, message: "Missing companyId or convoID" },
       { status: 400 }
     );
   }
 
-  // Connect to Chat DB and fetch conversation
   const { db: chatDb } = await connectToDatabase("Chat-DB");
   const convosCol = chatDb.collection("Conversations");
   const convo = await convosCol.findOne({ _id: new ObjectId(convoID) });
@@ -32,20 +24,12 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Resolve current user
-  const user = await UserFromOID(oid);
-  if (!user || !user._id) {
-    return Response.json(
-      { status: 404, message: "User not found from OID" },
-      { status: 404 }
-    );
-  }
-  const userIdStr = user._id.toString();
+  const companyIdStr = companyId.toString();
 
-  // Identify the other participant's ID string
+  // Find the other participant that is NOT the company
   const otherParticipantIdStr = convo.participants
     .map((p: any) => p.toString())
-    .find((pid: string) => pid !== userIdStr);
+    .find((pid: string) => pid !== companyIdStr);
 
   if (!otherParticipantIdStr) {
     return Response.json(
@@ -54,12 +38,12 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Connect to Users/Companies DB
   const { db: usersDb } = await connectToDatabase("Users");
   const companiesCol = usersDb.collection("Companies");
   const endusersCol = usersDb.collection("Endusers");
 
-  // Try finding the other user in Companies, then in Endusers
+  // The other participant should usually be an Enduser (person),
+  // but just in case, check both collections.
   let otherUser = await companiesCol.findOne({ _id: new ObjectId(otherParticipantIdStr) });
   if (!otherUser) {
     otherUser = await endusersCol.findOne({ _id: new ObjectId(otherParticipantIdStr) });
@@ -72,6 +56,5 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Return the found user (company or enduser)
   return Response.json(otherUser);
 }

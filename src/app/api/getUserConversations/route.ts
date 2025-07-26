@@ -11,8 +11,7 @@
 type User = {
     _id: string
 }
- /* THESE TYPES ARE MAKING ME SO ANNOYED
- TODO PUT ALL TYPES IN A D.TS AND EXPORT THEM INSTEAD OF THIS STUPID BS */
+
 import { connectToDatabase } from "@/utils/mongodb";
 import { UserFromOID } from "@/utils/UserFromOID";
 import { NextRequest } from "next/server";
