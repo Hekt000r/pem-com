@@ -17,7 +17,7 @@ export default function JobSearch({
   const [searchCity, setSearchCity] = useState(searchCityProp);
 
   useEffect(() => {
-    if (
+        if (
       typeof searchTermProp === "string" &&
       typeof searchCityProp === "string" &&
       searchTermProp.trim() !== "" &&
@@ -25,13 +25,15 @@ export default function JobSearch({
     ) {
       setSearchTerm(searchTermProp);
       setSearchCity(searchCityProp);
-      axios
+     if (typeof window !== "undefined") {
+       axios
         .get(
           `/api/searchJobs?searchTerm=${searchTermProp}&searchCity=${searchCityProp}`
         )
         .then((res) => {
           setJobs(res.data);
         });
+     }
     }
   }, [searchTermProp, searchCityProp]);
 

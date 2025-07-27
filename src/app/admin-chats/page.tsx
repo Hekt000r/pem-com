@@ -11,7 +11,7 @@ import Loading from "../loading";
 import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
 import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
 
 type Message = {
   _id: string;
@@ -296,7 +296,7 @@ export default function Page() {
                   zIndex: 999,
                 }}
               >
-                <EmojiPicker emojiStyle="native" onEmojiClick={onEmojiClick} />
+                <EmojiPicker emojiStyle={"native" as EmojiStyle} onEmojiClick={onEmojiClick} />
               </div>
             )}
 

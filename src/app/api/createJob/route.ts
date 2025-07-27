@@ -3,24 +3,25 @@
  * Params: jobData
  * Creates a new job in Standard Jobs collection
  **************/
-
 import { connectToDatabase } from "@/utils/mongodb";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-    const jobDataRaw = req.nextUrl.searchParams.get("jobData")
+    const jobDataRaw = req.nextUrl.searchParams.get("jobData");
 
     if (!jobDataRaw) {
-        return "No jobData provided."
+        return new Response("No jobData provided.", { status: 400 });
     }
 
-    const jobData = JSON.parse(jobDataRaw)
+    const jobData = JSON.parse(jobDataRaw);
 
-    const { db } = await connectToDatabase("Jobs")
+    const { db } = await connectToDatabase("Jobs");
+    const jobsCollection = db.collection("Standard");
 
-    const jobsCollection = db.collection("Standard")
+    await jobsCollection.insertOne(jobData);
 
-    const job = await jobsCollection.insertOne(jobData)
-
-    return Response.json({status: 200})
+    return new Response(JSON.stringify({ status: 200 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+    });
 }
