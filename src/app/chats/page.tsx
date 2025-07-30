@@ -11,6 +11,13 @@ import Loading from "../loading";
 import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
+import Linkify from 'linkify-react';
+
+const linkifyOptions = {
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  className: "underline"
+};
 
 type Message = {
   _id: string;
@@ -228,7 +235,9 @@ export default function Page() {
                         : "bg-gray-200 text-black"
                     }`}
                   >
+                    <Linkify options={linkifyOptions}>
                     {message.content}
+                    </Linkify>
                     <div
                       className={`text-[10px] mt-1 text-right ${
                         isCurrent ? "text-white" : "text-gray-500"

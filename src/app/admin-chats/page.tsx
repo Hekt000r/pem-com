@@ -12,6 +12,7 @@ import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
 import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
+import Linkify from "linkify-react";
 
 type Message = {
   _id: string;
@@ -19,6 +20,13 @@ type Message = {
   senderId: string;
   content: string;
   timestamp: Date;
+};
+
+
+const linkifyOptions = {
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  className: "underline"
 };
 
 type User = { _id: string; image: string };
@@ -264,7 +272,19 @@ export default function Page() {
                         : "bg-gray-200 text-black"
                     }`}
                   >
+                    <Linkify options={linkifyOptions}>
                     {message.content}
+                    </Linkify>
+                    <div
+                      className={`text-[10px] mt-1 text-right ${
+                        isCurrent ? "text-white" : "text-gray-500"
+                      }`}
+                    >
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
                 </div>
               );
