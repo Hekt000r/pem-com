@@ -234,8 +234,13 @@ export default function Page() {
         </div>
 
         {/* Messages Panel */}
-        <div className="flex-1 h-full mt-8 ml-2 rounded-md border border-gray-300 p-8 flex flex-col overflow-y-auto">
-          <div className="flex-1">
+        <div className="flex-1 h-full mt-8 ml-2 rounded-md border border-gray-300 flex flex-col">
+          <div
+            className="flex-1 overflow-y-auto px-8 py-4 space-y-4"
+            ref={(el) => {
+              if (el) el.scrollTop = el.scrollHeight; // Auto-scroll to bottom
+            }}
+          >
             {messages.map((message) => {
               const isCurrent = message.senderId === company._id;
               const avatar = isCurrent
@@ -253,7 +258,7 @@ export default function Page() {
                     </div>
                   </div>
                   <div
-                    className={`chat-bubble ${
+                    className={`chat-bubble whitespace-pre-wrap break-words max-w-xs ${
                       isCurrent
                         ? "bg-blue-500 text-white"
                         : "bg-gray-200 text-black"
@@ -265,22 +270,32 @@ export default function Page() {
               );
             })}
           </div>
-          <div className="flex items-center h-16 mt-auto border border-gray-300 rounded-full shadow-lg px-4">
+
+          {/* Input Bar */}
+          <div className="flex items-center h-16 mt-auto border border-gray-300 rounded-full shadow-lg px-4 m-4 relative">
             <input
               type="text"
-              className="flex-1"
+              className="flex-1 outline-0"
               placeholder="Shkruani mesazhin tuaj..."
               value={enteredMessage}
               onChange={(e) => setEnteredMessage(e.target.value)}
-            />
-            <button
-              onClick={() => {
-                if (active == false) {
-                  setActive(true);
-                } else {
-                  setActive(false);
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (!activeConversation || !enteredMessage.trim()) return;
+                  axios.get(
+                    `/api/companySendMessage?companyID=${
+                      company._id
+                    }&message=${encodeURIComponent(
+                      enteredMessage
+                    )}&channel=${activeConversation}`
+                  );
+                  setEnteredMessage("");
                 }
               }}
+            />
+            <button
+              onClick={() => setActive(!active)}
               className="btn btn-ghost px-2"
             >
               <FaRegSmile className="w-5 h-5" />
@@ -296,7 +311,10 @@ export default function Page() {
                   zIndex: 999,
                 }}
               >
-                <EmojiPicker emojiStyle={"native" as EmojiStyle} onEmojiClick={onEmojiClick} />
+                <EmojiPicker
+                  emojiStyle={"native" as EmojiStyle}
+                  onEmojiClick={onEmojiClick}
+                />
               </div>
             )}
 
@@ -306,9 +324,13 @@ export default function Page() {
             <button
               className="btn btn-success ml-2"
               onClick={() => {
-                if (!activeConversation) return;
+                if (!activeConversation || !enteredMessage.trim()) return;
                 axios.get(
-                  `/api/companySendMessage?companyID=${company._id}&message=${enteredMessage}&channel=${activeConversation}`
+                  `/api/companySendMessage?companyID=${
+                    company._id
+                  }&message=${encodeURIComponent(
+                    enteredMessage
+                  )}&channel=${activeConversation}`
                 );
                 setEnteredMessage("");
               }}

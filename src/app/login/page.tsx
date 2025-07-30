@@ -5,6 +5,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { redirect } from "next/navigation";
 import GoogleSignInButton from "@/Components/GoogleSignInButton";
 import { FaBuilding, FaBuildingUser } from "react-icons/fa6";
+import Navbar from "@/Components/Navbar";
 
 export default function Login() {
   const { data: session } = useSession();
@@ -14,6 +15,8 @@ export default function Login() {
       {session ? (
         redirect("/home")
       ) : (
+       <>
+       <Navbar page="none"/>
         <div className="flex justify-center items-center h-screen bg-slate-100">
           <div className="shadow-2xl w-[30%] h-[50%] rounded-2xl bg-white border-black">
             <div className="m-4 mt-8 flex flex-col items-center justify-center">
@@ -66,6 +69,7 @@ export default function Login() {
             </div>
           </div>
         </div>
+        </>
       )}
     </SessionProvider>
   );

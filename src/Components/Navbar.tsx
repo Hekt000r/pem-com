@@ -14,14 +14,14 @@ import { useState } from "react";
 import { TbMessageCircleFilled } from "react-icons/tb";
 
 type NavbarProps = {
-  page: "home" | "jobs" | "companies" | "chats";
+  page: "home" | "jobs" | "companies" | "chats" | "none";
 };
 
 export default function Navbar({ page }: NavbarProps) {
   const { data: session, status } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
-  const getBtnClass = (btn: "home" | "jobs" | "companies" | "chats") =>
+  const getBtnClass = (btn: "home" | "jobs" | "companies" | "chats" | "none") =>
     `h-10 btn btn-ghost p-1 flex${page === btn ? " text-green-700 bg-green-100 font-bold" : ""}`;
 
   return (
