@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
     const profileData: {
       firstName: string;
       surName: string;
-      address: string;
       age: number;
       birthday: string;
     } = JSON.parse(profileDataRaw);
@@ -53,7 +52,6 @@ export async function POST(req: NextRequest) {
       userId: user._id,
       firstName: profileData.firstName,
       surname: profileData.surName,
-      address: profileData.address,
       age: profileData.age,
       birthday: profileData.birthday,
       cvPath,
