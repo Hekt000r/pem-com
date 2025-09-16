@@ -22,7 +22,7 @@ export default function Navbar({ page }: NavbarProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   const getBtnClass = (btn: "home" | "jobs" | "companies" | "chats" | "none") =>
-    `h-10 btn btn-ghost p-1 flex${page === btn ? " text-green-700 bg-green-100 font-bold" : ""}`;
+    `h-10 btn btn-ghost p-1 flex${page === btn ? " text-blue-700 bg-blue-100 font-bold" : ""}`;
 
   return (
     <>
@@ -98,7 +98,7 @@ export default function Navbar({ page }: NavbarProps) {
                 </div>
                 </div>
             ) : (
-              <a href="/login" className="py-2 px-6 rounded-lg cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+              <a href="/login" className="py-2 px-6 rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold">
                 Kyçu
               </a>
             )}

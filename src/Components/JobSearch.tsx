@@ -91,7 +91,7 @@ export default function JobSearch({
                   console.table(jobs);
                 });
             }}
-            className="h-10 px-6  rounded-lg cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+            className="h-10 px-6  rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold"
           >
             Kërko
           </button>

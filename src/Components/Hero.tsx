@@ -12,7 +12,7 @@ export default function Hero() {
   const [searchCity, setSearchCity] = useState("");
 
   return (
-    <div className="bg-linear-to-r from-green-500 to-emerald-600 w-full h-80">
+    <div className="bg-linear-to-r from-blue-600 to-sky-700 w-full h-80">
       <div className="flex flex-col justify-center items-center h-[100%]">
         <h1 className="text-white font-montserrat font-semibold text-4xl">
           Gjej punën e ëndrrave
@@ -65,7 +65,7 @@ export default function Hero() {
           <div className="flex flex-1 justify-end items-center pr-4">
             <a
               href={`/jobs?searchTerm=${searchTerm}&searchCity=${searchCity}`}
-              className="h-10 px-6 rounded-lg cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center"
+              className="h-10 px-6 rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold flex items-center justify-center"
               style={{ textAlign: "center" }}
             >
               Kërko
@@ -80,8 +80,8 @@ export default function Hero() {
 
         <div className="flex mt-8 space-x-16">
           <div className="flex justify-center flex-col items-center">
-            <div className="rounded-full bg-green-200 w-16 h-16 flex items-center justify-center">
-              <IoChatbubbleOutline className="w-10 h-10 stroke-emerald-600" />
+            <div className="rounded-full bg-blue-200 w-16 h-16 flex items-center justify-center">
+              <IoChatbubbleOutline className="w-10 h-10 stroke-sky-600" />
             </div>
             <h1 className="mt-2 font-montserrat font-semibold text-xl">
               Komunikim Direkt
@@ -94,8 +94,8 @@ export default function Hero() {
           </div>
 
           <div className="flex justify-center flex-col items-center">
-            <div className="rounded-full bg-green-200 w-16 h-16 flex items-center justify-center">
-              <FiZap className="w-10 h-10 stroke-emerald-600" />
+            <div className="rounded-full bg-blue-200 w-16 h-16 flex items-center justify-center">
+              <FiZap className="w-10 h-10 stroke-sky-600" />
             </div>
             <h1 className="mt-2 font-montserrat font-semibold text-xl">
               {" "}
@@ -108,8 +108,8 @@ export default function Hero() {
             </p>
           </div>
           <div className="flex justify-center flex-col items-center">
-            <div className="rounded-full bg-green-200 w-16 h-16 flex items-center justify-center">
-              <FaShieldHalved className="w-10 h-10 text-emerald-600" />
+            <div className="rounded-full bg-blue-200 w-16 h-16 flex items-center justify-center">
+              <FaShieldHalved className="w-10 h-10 text-sky-600" />
             </div>
             <h1 className="mt-2 font-montserrat font-semibold text-xl">
               Siguria e plotë
@@ -121,8 +121,8 @@ export default function Hero() {
             </p>
           </div>
           <div className="flex justify-center flex-col items-center">
-            <div className="rounded-full bg-green-200 w-16 h-16 flex items-center justify-center">
-              <MdOutlineSupportAgent className="w-10 h-10 text-emerald-600" />
+            <div className="rounded-full bg-blue-200 w-16 h-16 flex items-center justify-center">
+              <MdOutlineSupportAgent className="w-10 h-10 text-sky-600" />
             </div>
             <h1 className="mt-2 font-montserrat font-semibold text-xl">
               Mbështetje Profesionale
@@ -143,7 +143,7 @@ export default function Hero() {
 
           <div className="flex flex-wrap gap-x-12">
             <div className="flex flex-col items-center mt-8">
-              <div className="flex items-center justify-center rounded-full bg-emerald-600 w-20 h-20">
+              <div className="flex items-center justify-center rounded-full bg-sky-600 w-20 h-20">
                 <h1 className="text-white font-bold text-3xl">1</h1>
               </div>
               <h1 className="mt-2 text-xl font-montserrat font-semibold">
@@ -157,7 +157,7 @@ export default function Hero() {
             </div>
 
             <div className="flex flex-col items-center mt-8">
-              <div className="flex items-center justify-center rounded-full bg-emerald-600 w-20 h-20">
+              <div className="flex items-center justify-center rounded-full bg-sky-600 w-20 h-20">
                 <h1 className="text-white font-bold text-3xl">2</h1>
               </div>
               <h1 className="mt-2 text-xl font-montserrat font-semibold">
@@ -171,7 +171,7 @@ export default function Hero() {
             </div>
 
             <div className="flex flex-col items-center mt-8">
-              <div className="flex items-center justify-center rounded-full bg-emerald-600 w-20 h-20">
+              <div className="flex items-center justify-center rounded-full bg-sky-600 w-20 h-20">
                 <h1 className="text-white font-bold text-3xl">3</h1>
               </div>
               <h1 className="mt-2 text-xl font-montserrat font-semibold">

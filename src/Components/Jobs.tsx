@@ -139,7 +139,7 @@ export default function Jobs({ Jobs: jobsProp }: JobsProps) {
           </div>
           <a
             href={`/job/${job._id}`}
-            className="w-full text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded"
+            className="w-full text-center cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded"
           >
             Më shumë
           </a>
