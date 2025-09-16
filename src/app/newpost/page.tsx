@@ -166,7 +166,7 @@ export default function Page() {
                 </h2>
               </div>
             </div>
-            <a className="w-full text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded">
+            <a className="w-full text-center cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded">
               Më shumë
             </a>
           </div>
@@ -236,7 +236,7 @@ export default function Page() {
                 <div className="bg-green-100 border-1 shadow-sm shadow-emerald-200 border-green-300 h-28 w-64 rounded-xl">
                   <div className="m-4 flex items-center">
                     <FaMoneyCheckAlt className="mr-1 fill-emerald-700 w-6 h-6" />
-                    <h1 className="font-montserrat font-medium text-emerald-900">
+                    <h1 className="font-montserrat font-medium text-green-900">
                       Rroga mujore
                     </h1>
                   </div>
