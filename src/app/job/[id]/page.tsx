@@ -11,10 +11,13 @@ import "@/Components/markdown.css"
 import Markdown from "react-markdown";
 import Navbar from "@/Components/Navbar";
 import { TbMessageCircleFilled } from "react-icons/tb";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 type Company = {
   displayName: string;
   imgURL: string;
+  _id: string;
 };
 
 type Job = {
@@ -52,6 +55,15 @@ export default function Page({
   const { id } = React.use(params); // unwrap params with React.use()
   const [company, setCompany] = useState<Company>();
   const [job, setJob] = useState<Job>();
+  const {data: session, status } = useSession()
+
+  const handleConvoStart = () => {
+    axios.get(`/api/startConvo?userOID=${session?.user.oauthId}&companyOID=${company?._id}`).then((res) => {
+      if (res.data.convoId) {
+        redirect(`/chats`)
+      }
+    })
+  }
 
   useEffect(() => {
     axios.get(`/api/getCompanyByJobID?jobID=${id}`).then((res) => {
@@ -126,7 +138,9 @@ export default function Page({
             <div className="flex flex-col max-h-48 pb-8 w-100 mt-2 shadow-md border-1 border-gray-300 rounded-lg ">
               <h1 className="font-montserrat text-lg text-center font-medium mt-8">Filloni një bisedë në platformën tonë!</h1>
               <div className="flex justify-center mt-2">
-                 <button className="flex items-center justify-center w-48 text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded"><TbMessageCircleFilled className="mr-2"/> Bisedo tani </button>
+                 <button onClick={() => {
+                  handleConvoStart()
+                 }} className="flex items-center justify-center w-48 text-center cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded"><TbMessageCircleFilled className="mr-2"/> Bisedo tani </button>
               </div>
               <p className="mx-4 mt-2 text-md text-center text-gray-600">Kjo do të filloj një bisedë midis teje dhe <br /> {company?.displayName}</p>
             </div>
