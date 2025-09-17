@@ -60,7 +60,7 @@ export default function Page({
   const handleConvoStart = () => {
     axios.get(`/api/startConvo?userOID=${session?.user.oauthId}&companyOID=${company?._id}`).then((res) => {
       if (res.data.convoId) {
-        redirect(`/chats`)
+        redirect(`/chats?jumpTo=${res.data.convoId}`)
       }
     })
   }

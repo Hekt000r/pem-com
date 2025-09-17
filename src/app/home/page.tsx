@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import Hero from "@/Components/Hero"
 import Jobs from "@/Components/Jobs"
+import Loading from "@/Components/Loading"
 
 export default function Home() {
     const [userData, setUserData] = useState<any>(null)
@@ -26,10 +27,14 @@ export default function Home() {
         }
     }, [status, session])
 
+    if (status === "loading") {
+        return (<Loading/>)
+    }
+
     return (
         <div>
             <Navbar page="home" />
-            {status === "authenticated" ? (<Jobs/>): (<Hero/>)}
+            {status === "authenticated" ? <Jobs /> : <Hero />}
         </div>
     )
 }

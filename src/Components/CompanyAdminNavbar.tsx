@@ -42,9 +42,9 @@ export default function CompanyAdminNavbar({
           {session ? (
             <div className="flex relative items-center justify-center h-full">
               <button className="h-10 btn btn-ghost p-1 flex ml-2 mr-2 items-center justify-center">
-                <h1 className="justify-center h-12 flex items-center mr-2">
+                <a href="/home" className="justify-center h-12 flex items-center mr-2">
                   <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Dil prej Admin
-                </h1>
+                </a>
               </button>
 
               <button

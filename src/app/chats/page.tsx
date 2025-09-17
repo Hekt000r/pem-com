@@ -3,7 +3,7 @@ import Navbar from "@/Components/Navbar";
 import "@/Components/components.css";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { FaRegSmile, FaSearch } from "react-icons/fa";
 import { FaLink, FaPlus } from "react-icons/fa6";
@@ -11,12 +11,12 @@ import Loading from "../loading";
 import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
-import Linkify from 'linkify-react';
+import Linkify from "linkify-react";
 
 const linkifyOptions = {
-  target: '_blank',
-  rel: 'noopener noreferrer',
-  className: "underline"
+  target: "_blank",
+  rel: "noopener noreferrer",
+  className: "underline",
 };
 
 type Message = {
@@ -37,6 +37,9 @@ export default function Page() {
     required: true,
     onUnauthenticated: () => redirect("/"),
   });
+  const searchParams = useSearchParams();
+  const jumpTo = searchParams.get("jumpTo"); // <-- get param
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [data, setData] = useState<
     Record<string, { imgURL?: string; name?: string }>
@@ -84,9 +87,14 @@ export default function Page() {
       .get(`/api/getUserConversations?oid=${session.user.oauthId}`)
       .then(async (res) => {
         setConversations(res.data);
-        if (res.data.length > 0 && !activeConversation) {
+
+        // If jumpTo param is present and valid, use it
+        if (jumpTo && res.data.some((c: any) => c._id === jumpTo)) {
+          setActiveConversation(jumpTo);
+        } else if (res.data.length > 0 && !activeConversation) {
           setActiveConversation(res.data[0]._id);
         }
+
         const names: Record<string, { imgURL?: string; name?: string }> = {};
         await Promise.all(
           res.data.map(async (convo: any) => {
@@ -98,7 +106,7 @@ export default function Page() {
         );
         setData(names);
       });
-  }, [session?.user?.oauthId]);
+  }, [session?.user?.oauthId, jumpTo]);
 
   // Fetch logged-in user info
   useEffect(() => {
@@ -236,7 +244,7 @@ export default function Page() {
                     }`}
                   >
                     <Linkify options={linkifyOptions}>
-                    {message.content}
+                      {message.content}
                     </Linkify>
                     <div
                       className={`text-[10px] mt-1 text-right ${

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { signOut, useSession } from "next-auth/react";
 import { FaHome } from "react-icons/fa";
 import {
@@ -10,19 +10,40 @@ import {
 } from "react-icons/fa6";
 import Image from "next/image";
 import { IoPersonCircle } from "react-icons/io5";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TbMessageCircleFilled } from "react-icons/tb";
+import { MdAdminPanelSettings } from "react-icons/md";
+import axios from "axios";
 
 type NavbarProps = {
   page: "home" | "jobs" | "companies" | "chats" | "none";
 };
 
 export default function Navbar({ page }: NavbarProps) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const fetchAdminStatus = async () => {
+      if (!session?.user?.oauthId) return;
+
+      try {
+        const res = await axios.get(`/api/getUserAdminCompany?oid=${session.user.oauthId}`);
+        setIsAdmin(res.data.isAdmin);
+      } catch (err) {
+        console.error("Error fetching admin status:", err);
+        setIsAdmin(false);
+      }
+    };
+
+    fetchAdminStatus();
+  }, [session]);
 
   const getBtnClass = (btn: "home" | "jobs" | "companies" | "chats" | "none") =>
-    `h-10 btn btn-ghost p-1 flex${page === btn ? " text-blue-700 bg-blue-100 font-bold" : ""}`;
+    `h-10 btn btn-ghost p-1 flex${
+      page === btn ? " text-blue-700 bg-blue-100 font-bold" : ""
+    }`;
 
   return (
     <>
@@ -47,7 +68,7 @@ export default function Navbar({ page }: NavbarProps) {
                 <FaBriefcase className="m-2 text-xl" /> Kompanitë
               </h1>
             </button>
-             <a href="/chats" className={getBtnClass("chats") + " ml-2"}>
+            <a href="/chats" className={getBtnClass("chats") + " ml-2"}>
               <h1 className="justify-center h-12 flex items-center mr-2">
                 <TbMessageCircleFilled className="m-2 text-xl" /> Bisedimet
               </h1>
@@ -56,11 +77,10 @@ export default function Navbar({ page }: NavbarProps) {
 
           <div className="flex h-10 w-full justify-end items-center mr-[15%]">
             {session ? (
-                <div className="flex relative">
+              <div className="flex relative">
                 <button className="h-10 btn btn-ghost p-1 flex ml-2 mr-2">
                   <h1 className="justify-center h-12 flex items-center mr-2">
-                  <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Profili
-                  im
+                    <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Profili im
                   </h1>
                 </button>
 
@@ -69,36 +89,56 @@ export default function Navbar({ page }: NavbarProps) {
                   className="w-10 h-10 btn btn-ghost rounded-full overflow-hidden p-0.5"
                 >
                   <Image
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-cover rounded-full"
-                  src={session?.user?.image!}
-                  alt="User"
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-cover rounded-full"
+                    src={session?.user?.image!}
+                    alt="User"
                   />
                 </button>
 
                 <div
-                  className={`absolute top-12 right-0 shadow-xl border border-black rounded-2xl h-40 w-56 bg-white flex flex-col items-end z-50 transition-all duration-200 ease-out
-                  ${isVisible ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}
+                  className={`absolute top-12 right-0 shadow-xl border border-black rounded-2xl max-h-56 pb-4 w-56 bg-white flex flex-col items-end z-50 transition-all duration-200 ease-out
+                  ${
+                    isVisible
+                      ? "opacity-100 scale-100 pointer-events-auto"
+                      : "opacity-0 scale-95 pointer-events-none"
+                  }
                   `}
                   style={{ transformOrigin: "top right" }}
                 >
                   <button className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2">
-                  <FaGear className="w-5 h-5" />
-                  <h1 className="text-md">Settings</h1>
+                    <FaGear className="w-5 h-5" />
+                    <h1 className="text-md">Settings</h1>
                   </button>
                   <button className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2">
-                  <FaBookmark className="w-5 h-5" />
-                  <h1 className="text-md">Punët e ruajtura</h1>
+                    <FaBookmark className="w-5 h-5" />
+                    <h1 className="text-md">Punët e ruajtura</h1>
                   </button>
-                  <button onClick={()=>{signOut()}} className="w-[90%] btn btn-error rounded-xl p-1 mt-2 h-10 justify-center mr-2 pr-2">
-                  <FaDoorOpen className="w-5 h-5" />
-                  <h1 className="text-md">Dil</h1>
+
+                  {isAdmin && (
+                    <a href="/pem-admin" className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2">
+                      <MdAdminPanelSettings className="w-6 h-6" />
+                      <h1 className="text-md">Admin</h1>
+                    </a>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      signOut();
+                    }}
+                    className="w-[90%] btn btn-error rounded-xl p-1 mt-2 h-10 justify-center mr-2 pr-2"
+                  >
+                    <FaDoorOpen className="w-5 h-5" />
+                    <h1 className="text-md">Dil</h1>
                   </button>
                 </div>
-                </div>
+              </div>
             ) : (
-              <a href="/login" className="py-2 px-6 rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold">
+              <a
+                href="/login"
+                className="py-2 px-6 rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold"
+              >
                 Kyçu
               </a>
             )}

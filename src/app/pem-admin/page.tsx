@@ -20,37 +20,48 @@ interface Company {
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
-  const [company, setCompany] = useState<Company>();
+  const [company, setCompany] = useState<Company | null>(null);
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!session || !session.user || !session.user.oauthId) {
-        setLoading(false);
+      if (!session?.user?.oauthId) {
         router.replace("/");
         return;
       }
-      try {
-        const res = await axios.get(
-          `/api/getUserAdminCompany?oid=${session.user.oauthId}`
-        );
 
-        setCompany(res.data);
+      try {
+        const res = await axios.get(`/api/getUserAdminCompany?oid=${session.user.oauthId}`);
+        const { company, isAdmin } = res.data;
+
+        if (!isAdmin || !company) {
+          router.replace("/");
+          return;
+        }
+
+        setCompany(company);
       } catch (e) {
+        console.error("Unexpected error while checking admin:", e);
         router.replace("/");
-        console.log(`error: ${e}`);
       } finally {
         setLoading(false);
       }
     };
-    if (session) {
+
+    if (status === "authenticated") {
       checkAdmin();
+    } else if (status === "unauthenticated") {
+      router.replace("/");
     }
-  }, [session]);
+  }, [session, status, router]);
 
   if (loading) {
     return <Loading />;
+  }
+
+  if (!company) {
+    return null;
   }
   return (
     <div>
