@@ -21,7 +21,7 @@ import { TbMessageCircleFilled } from "react-icons/tb";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import remarkGfm from "remark-gfm";
 export default function Page() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   type Company = {
     imgURL: string;
@@ -29,6 +29,7 @@ export default function Page() {
     name: string;
     _id: string;
   };
+
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,9 +40,38 @@ export default function Page() {
 
   const [description, setDescription] = useState("");
 
+  const handleCreate = async () => {
+    const jobData = {
+      title,
+      city,
+      Location: location,
+      salary,
+      description,
+      company_displayName: company?.displayName,
+      thumbnail: company?.imgURL,
+      company_id: company?._id,
+      createdAt: new Date(),
+    };
+    try {
+      console.table(jobData);
+      await axios.get(
+        `/api/createJob?jobData=${encodeURIComponent(JSON.stringify(jobData))}`
+      );
+      alert("Postimi u krijua me sukses!");
+      window.location.replace("/pem-admin");
+    } catch (error) {
+      if (isRedirectError(error)) {
+        return;
+      } else {
+        alert("Ndodhi një gabim gjatë krijimit të postimit.");
+        console.error(error);
+      }
+    }
+  };
+
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!session || !session.user || !session.user.oauthId) {
+      if (!session?.user?.oauthId) {
         setLoading(false);
         redirect("/");
         return;
@@ -51,19 +81,26 @@ export default function Page() {
           `/api/getUserAdminCompany?oid=${session.user.oauthId}`
         );
 
+        if (!res.data.isAdmin) {
+          // Not an admin → redirect away
+          redirect("/");
+          return;
+        }
+
         setCompany({
-          imgURL: res.data.imgURL ?? "",
-          displayName: res.data.displayName ?? "",
-          name: res.data.name ?? "",
-          _id: res.data._id ?? "",
+          imgURL: res.data.company?.imgURL ?? "",
+          displayName: res.data.company?.displayName ?? "",
+          name: res.data.company?.name ?? "",
+          _id: res.data.company?._id ?? "",
         });
       } catch (e) {
+        console.error("Error checking admin:", e);
         redirect("/");
-        console.log(`error: ${e}`);
       } finally {
         setLoading(false);
       }
     };
+
     if (session) {
       checkAdmin();
     } else {
@@ -282,40 +319,40 @@ export default function Page() {
             Gati për ta postuar?
           </h1>
           <button
-            onClick={async () => {
-              const jobData = {
-                title,
-                city,
-                Location: location,
-                salary,
-                description,
-                company_displayName: company?.displayName,
-                thumbnail: company?.imgURL,
-                  company_id: company?._id,
-                  createdAt: new Date()
-              };
-              try {
-                console.table(jobData);
-                await axios.get(
-                  `/api/createJob?jobData=${encodeURIComponent(
-                    JSON.stringify(jobData)
-                  )}`
-                );
-                alert("Postimi u krijua me sukses!");
-                window.location.replace("/pem-admin")
-              } catch (error) {
-                if (isRedirectError(error)) {
-                  return;
-                } else {
-                  alert("Ndodhi një gabim gjatë krijimit të postimit.");
-                  console.error(error);
-                }
+            onClick={() => {
+              const modal = document.getElementById(
+                "my_modal_1"
+              ) as HTMLDialogElement | null;
+              if (modal) {
+                modal.showModal();
               }
             }}
             className="btn btn-primary btn-lg btn-wide"
           >
             Posto
           </button>
+          <dialog id="my_modal_1" className="modal">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg">A jeni të sigurt?</h3>
+              <p className="py-4">
+                Ky postim do të jetë i dukshëm për të gjithë. Sigurohu që ke
+                plotësuar informacionin siç duhet.
+              </p>
+
+              <div className="modal-action">
+                <form method="dialog">
+                  {/* if there is a button in form, it will close the modal */}
+                  <button
+                    onClick={handleCreate}
+                    className="btn btn-primary mr-4"
+                  >
+                    Posto
+                  </button>
+                  <button className="btn btn-error">Mbyll</button>
+                </form>
+              </div>
+            </div>
+          </dialog>
         </div>
       </div>
     </>

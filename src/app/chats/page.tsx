@@ -35,7 +35,7 @@ type Conversation = { _id: string };
 export default function Page() {
   const { data: session } = useSession({
     required: true,
-    onUnauthenticated: () => redirect("/"),
+    onUnauthenticated: () => redirect("/login"),
   });
   const searchParams = useSearchParams();
   const jumpTo = searchParams.get("jumpTo"); // <-- get param

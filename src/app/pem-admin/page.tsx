@@ -2,7 +2,7 @@
 import "@/Components/components.css";
 import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Loading from "@/Components/Loading";
 import axios from "axios";
@@ -174,12 +174,14 @@ export default function Page() {
               <h1 className="font-montserrat text-3xl font-medium">
                 Veprimet e shpejta
               </h1>
-              <button className="mt-4 rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 bg-linear-to-r from-blue-500 to-sky-500">
+              <button onClick={() => {
+                redirect("/newpost")
+              }} className="mt-4 rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 bg-linear-to-r from-blue-500 to-sky-500">
                 <div className="flex flex-col items-center">
                   <FaPlusSquare className="text-white w-8 h-8" />
-                  <h1 className="text-white font-medium">
+                  <a className="text-white font-medium">
                     Krijo një postim të ri
-                  </h1>
+                  </a>
                 </div>
               </button>
               <button className="mt-4 ml-8 rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 border-4 border-sky-500">
