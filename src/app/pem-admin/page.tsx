@@ -7,16 +7,23 @@ import { useSession } from "next-auth/react";
 import Loading from "@/Components/Loading";
 import axios from "axios";
 import { LuMessageCircle } from "react-icons/lu";
-import { FaGraduationCap, FaMedal, FaRegClock } from "react-icons/fa6";
+import {
+  FaGraduationCap,
+  FaMedal,
+  FaMessage,
+  FaRegClock,
+} from "react-icons/fa6";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { FaListAlt, FaPlusSquare } from "react-icons/fa";
+import { MdAdminPanelSettings } from "react-icons/md";
+import { AiFillMessage } from "react-icons/ai";
+import { BsMegaphone, BsMegaphoneFill } from "react-icons/bs";
 
 interface Company {
   name: string;
   displayName: string;
   imgURL: string;
 }
-
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
@@ -32,7 +39,9 @@ export default function Page() {
       }
 
       try {
-        const res = await axios.get(`/api/getUserAdminCompany?oid=${session.user.oauthId}`);
+        const res = await axios.get(
+          `/api/getUserAdminCompany?oid=${session.user.oauthId}`
+        );
         const { company, isAdmin } = res.data;
 
         if (!isAdmin || !company) {
@@ -76,93 +85,220 @@ export default function Page() {
           </h2>
         </div>
 
-        <div className="flex justify-center items-center mt-8 space-x-12 flex-wrap">
-          <div className="lg:flex lg:space-x-10">
-            <div className="shadow-md h-44 w-80 mt-2 border-[1px] border-gray-300 rounded-2xl ">
-              <div className="flex m-3">
-                <img
-                  src={company?.imgURL}
-                  className="w-12 hover:brightness-80 cursor-pointer h-12 rounded-md"
-                  alt=""
-                />
-                <div className="flex-col ml-2">
-                  <h1 className="font-montserrat font-semibold">
-                    {company?.displayName}
-                  </h1>
-                  <h2 className="font-montserrat">Plani: Biznes i vogël</h2>
-                </div>
-              </div>
-              <div className="m-2 p-1 text-sm font-montserrat">
-                <div>
-                  <h2>
-                    Postimet: <b className="">11</b> nga <b>15</b>
-                  </h2>
-                  <h2>
-                    Adminët: <b>1</b> nga <b>5</b>
-                  </h2>
-                  <h2>
-                    Bisedimet: <b>21</b> nga <b>100</b>
-                  </h2>
-                </div>
-                <div className="flex justify-end items-end h-full">
-                  <button className="btn btn-primary btn-sm">
-                    Ndrysho planin
-                  </button>
+        <div className="flex space-x-8 ml-8">
+          <div className="flex justify-center items-center mt-8 space-x-12 flex-wrap">
+            <div className="lg:flex lg:space-x-10">
+              <div className="shadow-md h-56 w-[40rem] mt-2 border-[1px] border-gray-300 rounded-2xl ">
+                <div className="m-4">
+                  <div className="grid grid-flow-col auto-rows-max grid-rows-3 gap-y-6 gap-x-8">
+                    {/* Plan Overview */}
+
+                    <div className="flex">
+                      <img
+                        className="w-13 mr-2 rounded-lg h-13"
+                        src={company.imgURL}
+                        alt="Company Logo"
+                      />
+                      <div className="flex flex-col">
+                        <h1 className="text-xl font-montserrat font-semibold">
+                          {company.displayName}
+                        </h1>
+                        <h2 className="font-montserrat font-medium">
+                          Plani: Biznes i vogël
+                        </h2>
+                      </div>
+                    </div>
+
+                    {/* Active Admins*/}
+
+                    <div className="flex">
+                      <MdAdminPanelSettings className="w-10 mr-2 bg-gray-300 rounded-lg h-10" />
+                      <div className="flex flex-col">
+                        <h1 className="text-md font-montserrat font-medium">
+                          Adminët aktiv (1/5)
+                        </h1>
+
+                        <progress
+                          value={1}
+                          max={5}
+                          className="progress progress-primary w-56 mt-1"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Messages this month */}
+                    <div className="flex">
+                      <div className="w-10 mr-2 flex items-center justify-center bg-gray-300 rounded-lg h-10">
+                        <FaMessage className="w-6 h-6" />
+                      </div>
+                      <div className="flex flex-col">
+                        <h1 className="text-md font-montserrat font-medium">
+                          Mesazhet këtë muaj (78/200)
+                        </h1>
+
+                        <progress
+                          value={78}
+                          max={200}
+                          className="progress progress-primary w-56 mt-1"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Change Plan*/}
+                    <div className="btn btn-primary">Ndrysho planin</div>
+
+                    {/* Total Posts*/}
+
+                    <div className="flex">
+                      <div className="w-10 mr-2 flex items-center justify-center bg-gray-300 rounded-lg h-10">
+                        <FaListAlt className="w-6 h-6" />
+                      </div>
+                      <div className="flex flex-col">
+                        <h1 className="text-md font-montserrat font-medium">
+                          Postimet këtë muaj (4/15)
+                        </h1>
+
+                        <progress
+                          value={4}
+                          max={15}
+                          className="progress progress-primary w-56 mt-1"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Conversations this month */}
+                    <div className="flex">
+                      <div className="w-10 mr-2 flex items-center justify-center bg-gray-300 rounded-lg h-10">
+                        <BsMegaphoneFill className="w-6 h-6" />
+                      </div>
+                      <div className="flex flex-col">
+                        <h1 className="text-md font-montserrat font-medium">
+                          Reklama këtë muaj (1/2)
+                        </h1>
+
+                        <progress
+                          value={1}
+                          max={2}
+                          className="progress progress-primary w-56 mt-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="shadow-md h-44 w-80 mt-2 border-[1px] border-gray-300 rounded-2xl ">
-              <div className="m-4 p-1 text-sm font-montserrat flex items-center">
-                <h1 className="text-lg font-medium font-montserrat">
-                  Bisedimet e reja
-                </h1>
-                <span className="ml-auto">
-                  <LuMessageCircle className="h-6 w-6 opacity-70" />
-                </span>
-              </div>
-              <div className="m-4 p-2">
-                <h1 className="font-semibold text-3xl font-montserrat ">
-                  9 këtë muaj
-                </h1>
-                <h2 className="font-montserrat text-sm opacity-70">
-                  më shumë se shumica e kompanive
-                </h2>
-              </div>
-            </div>
-            <div className="shadow-md h-44 w-80 mt-2 border-[1px] border-gray-300 rounded-2xl ">
-              <div className="ml-4 mt-4 p-1 text-sm font-montserrat flex items-center">
-                <h1 className="text-lg font-medium font-montserrat">
-                  Koha mesatare
-                </h1>
-                <span className="ml-auto text-xl opacity-70 mr-4">
-                  <FaRegClock />
-                </span>
-              </div>
-              <div className="ml-4 p-2">
-                <h1 className="font-semibold text-xl w-full font-montserrat ">
-                  3 orë e 23 sekonda për t'iu përgjigjur klientëve
-                </h1>
-                <h2 className="font-montserrat opacity-70 text-sm">
-                  më vonë se shumica e kompanive
-                </h2>
-              </div>
-            </div>
-            <div className="shadow-md h-44 w-80 mt-2 border-[1px] border-gray-300 rounded-2xl ">
-              <div className="ml-4 mt-4 p-1 text-sm font-montserrat flex items-center">
-                <h1 className="text-lg font-medium font-montserrat">
-                  Postimi më i biseduar
-                </h1>
-                <span className="ml-auto text-xl opacity-70 mr-4">
-                  <FaMedal />
-                </span>
-              </div>
-              <div className="ml-4 p-2">
-                <h1 className="font-semibold text-xl w-full font-montserrat ">
-                  <a href="" style={{ textDecoration: "underline" }}>
-                    Kasier/e Kryesor
-                  </a>{" "}
-                  me 5 bisedime
-                </h1>
+          </div>
+
+          <div className="flex justify-center items-center mt-8 space-x-12 flex-wrap">
+            <div className="lg:flex lg:space-x-10">
+              <div className="shadow-md h-56 w-[40rem] mt-2 border-[1px] border-gray-300 rounded-2xl ">
+                <div className="m-6">
+                  <div className="flex items-center">
+                    <h1 className="text-2xl mr-4 font-montserrat font-medium">
+                      Adminët
+                    </h1>
+                    <button className="btn btn-primary">
+                      <FaPlusSquare className="w-6 h-6" /> Shto një admin
+                    </button>
+                  </div>
+
+                  <div className="m-2 outline-gray-400 outline-1 rounded-xl h-32 grid grid-cols-2 overflow-y-auto">
+                    {/**/}
+                    <div className="m-2 max-h-12">
+                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
+                        <img
+                          className="h-11 mr-2 rounded-lg"
+                          src={session?.user.image!}
+                          alt=""
+                        />
+                        <div>
+                          <h1 className="font-montserrat font-medium">
+                            Hektor Zaimi
+                          </h1>
+                          <h2 className="font-montserrat text-sm">
+                            hektorzaimi.dev@gmail.com
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                    {/**/}
+                    <div className="m-2 max-h-12">
+                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
+                        <img
+                          className="h-11 mr-2 rounded-lg"
+                          src={session?.user.image!}
+                          alt=""
+                        />
+                        <div>
+                          <h1 className="font-montserrat font-medium">
+                            Hektor Zaimi
+                          </h1>
+                          <h2 className="font-montserrat text-sm">
+                            hektorzaimi.dev@gmail.com
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                    {/**/}
+                    {/**/}
+                    <div className="m-2 max-h-12">
+                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
+                        <img
+                          className="h-11 mr-2 rounded-lg"
+                          src={session?.user.image!}
+                          alt=""
+                        />
+                        <div>
+                          <h1 className="font-montserrat font-medium">
+                            Hektor Zaimi
+                          </h1>
+                          <h2 className="font-montserrat text-sm">
+                            hektorzaimi.dev@gmail.com
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                    {/**/}
+                                        {/**/}
+                    <div className="m-2 max-h-12">
+                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
+                        <img
+                          className="h-11 mr-2 rounded-lg"
+                          src={session?.user.image!}
+                          alt=""
+                        />
+                        <div>
+                          <h1 className="font-montserrat font-medium">
+                            Hektor Zaimi
+                          </h1>
+                          <h2 className="font-montserrat text-sm">
+                            hektorzaimi.dev@gmail.com
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                    {/**/}
+                                        {/**/}
+                    <div className="m-2 max-h-12">
+                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
+                        <img
+                          className="h-11 mr-2 rounded-lg"
+                          src={session?.user.image!}
+                          alt=""
+                        />
+                        <div>
+                          <h1 className="font-montserrat font-medium">
+                            Hektor Zaimi
+                          </h1>
+                          <h2 className="font-montserrat text-sm">
+                            hektorzaimi.dev@gmail.com
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                    {/**/}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -174,9 +310,12 @@ export default function Page() {
               <h1 className="font-montserrat text-3xl font-medium">
                 Veprimet e shpejta
               </h1>
-              <button onClick={() => {
-                redirect("/newpost")
-              }} className="mt-4 rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 bg-linear-to-r from-blue-500 to-sky-500">
+              <button
+                onClick={() => {
+                  redirect("/newpost");
+                }}
+                className="mt-4 rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 bg-linear-to-r from-blue-500 to-sky-500"
+              >
                 <div className="flex flex-col items-center">
                   <FaPlusSquare className="text-white w-8 h-8" />
                   <a className="text-white font-medium">
