@@ -32,6 +32,7 @@ type AdminProps = {
 export default function Admin({ BillingData }: AdminProps) {
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState<Company | null>(null);
+  const [admins, setAdmins] = useState<any>(null);
   const router = useRouter();
   const { data: session, status } = useSession();
 
@@ -53,6 +54,11 @@ export default function Admin({ BillingData }: AdminProps) {
           return;
         }
 
+        const res2 = await axios.get(
+          `/api/getCompanyAdmins?companyID=${res.data.company._id}`
+        );
+
+        setAdmins(res2.data);
         setCompany(company);
       } catch (e) {
         console.error("Unexpected error while checking admin:", e);
@@ -119,7 +125,8 @@ export default function Admin({ BillingData }: AdminProps) {
                       <MdAdminPanelSettings className="w-10 mr-2 bg-gray-300 rounded-lg h-10" />
                       <div className="flex flex-col">
                         <h1 className="text-md font-montserrat font-medium">
-                          Adminët aktiv ({BillingData.CompanyBillingInfo.admins}/{BillingData.BillingPlanInfo.maxAdmins})
+                          Adminët aktiv ({BillingData.CompanyBillingInfo.admins}
+                          /{BillingData.BillingPlanInfo.maxAdmins})
                         </h1>
 
                         <progress
@@ -137,7 +144,9 @@ export default function Admin({ BillingData }: AdminProps) {
                       </div>
                       <div className="flex flex-col">
                         <h1 className="text-md font-montserrat font-medium">
-                          Mesazhet këtë muaj ({BillingData.CompanyBillingInfo.messages}/{BillingData.BillingPlanInfo.maxMessages})
+                          Mesazhet këtë muaj (
+                          {BillingData.CompanyBillingInfo.messages}/
+                          {BillingData.BillingPlanInfo.maxMessages})
                         </h1>
 
                         <progress
@@ -159,7 +168,9 @@ export default function Admin({ BillingData }: AdminProps) {
                       </div>
                       <div className="flex flex-col">
                         <h1 className="text-md font-montserrat font-medium">
-                          Postimet këtë muaj ({BillingData.CompanyBillingInfo.posts}/{BillingData.BillingPlanInfo.maxPosts})
+                          Postimet këtë muaj (
+                          {BillingData.CompanyBillingInfo.posts}/
+                          {BillingData.BillingPlanInfo.maxPosts})
                         </h1>
 
                         <progress
@@ -177,7 +188,9 @@ export default function Admin({ BillingData }: AdminProps) {
                       </div>
                       <div className="flex flex-col">
                         <h1 className="text-md font-montserrat font-medium">
-                          Reklama këtë muaj ({BillingData.CompanyBillingInfo.ads}/{BillingData.BillingPlanInfo.maxAds})
+                          Reklama këtë muaj (
+                          {BillingData.CompanyBillingInfo.ads}/
+                          {BillingData.BillingPlanInfo.maxAds})
                         </h1>
 
                         <progress
@@ -208,98 +221,25 @@ export default function Admin({ BillingData }: AdminProps) {
 
                   <div className="m-2 outline-gray-400 outline-1 rounded-xl h-32 grid grid-cols-2 overflow-y-auto">
                     {/**/}
-                    <div className="m-2 max-h-12">
-                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                        <img
-                          className="h-11 mr-2 rounded-lg"
-                          src={session?.user.image!}
-                          alt=""
-                        />
-                        <div>
-                          <h1 className="font-montserrat font-medium">
-                            Hektor Zaimi
-                          </h1>
-                          <h2 className="font-montserrat text-sm">
-                            hektorzaimi.dev@gmail.com
-                          </h2>
+                    {admins.map((admin: any, key: any) => (
+                      <div key={admin} className="m-2 max-h-12">
+                        <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
+                          <img
+                            className="h-11 mr-2 rounded-lg"
+                            src={session?.user.image!}
+                            alt=""
+                          />
+                          <div>
+                            <h1 className="font-montserrat font-medium">
+                              {admin.profile.firstName} {admin.profile.surname} 
+                            </h1>
+                            <h2 className="font-montserrat text-sm">
+                              {admin.user.email}
+                            </h2>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {/**/}
-                    <div className="m-2 max-h-12">
-                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                        <img
-                          className="h-11 mr-2 rounded-lg"
-                          src={session?.user.image!}
-                          alt=""
-                        />
-                        <div>
-                          <h1 className="font-montserrat font-medium">
-                            Hektor Zaimi
-                          </h1>
-                          <h2 className="font-montserrat text-sm">
-                            hektorzaimi.dev@gmail.com
-                          </h2>
-                        </div>
-                      </div>
-                    </div>
-                    {/**/}
-                    {/**/}
-                    <div className="m-2 max-h-12">
-                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                        <img
-                          className="h-11 mr-2 rounded-lg"
-                          src={session?.user.image!}
-                          alt=""
-                        />
-                        <div>
-                          <h1 className="font-montserrat font-medium">
-                            Hektor Zaimi
-                          </h1>
-                          <h2 className="font-montserrat text-sm">
-                            hektorzaimi.dev@gmail.com
-                          </h2>
-                        </div>
-                      </div>
-                    </div>
-                    {/**/}
-                                        {/**/}
-                    <div className="m-2 max-h-12">
-                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                        <img
-                          className="h-11 mr-2 rounded-lg"
-                          src={session?.user.image!}
-                          alt=""
-                        />
-                        <div>
-                          <h1 className="font-montserrat font-medium">
-                            Hektor Zaimi
-                          </h1>
-                          <h2 className="font-montserrat text-sm">
-                            hektorzaimi.dev@gmail.com
-                          </h2>
-                        </div>
-                      </div>
-                    </div>
-                    {/**/}
-                                        {/**/}
-                    <div className="m-2 max-h-12">
-                      <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                        <img
-                          className="h-11 mr-2 rounded-lg"
-                          src={session?.user.image!}
-                          alt=""
-                        />
-                        <div>
-                          <h1 className="font-montserrat font-medium">
-                            Hektor Zaimi
-                          </h1>
-                          <h2 className="font-montserrat text-sm">
-                            hektorzaimi.dev@gmail.com
-                          </h2>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                     {/**/}
                   </div>
                 </div>
