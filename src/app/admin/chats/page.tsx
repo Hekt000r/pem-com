@@ -1,121 +1,72 @@
 "use client";
-import Navbar from "@/Components/Navbar";
-import "@/Components/components.css";
+
+import { useCompany } from "@/contexts/CompanyContext";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaRegSmile, FaSearch } from "react-icons/fa";
 import { FaLink, FaPlus } from "react-icons/fa6";
-import Loading from "../loading";
-import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
-import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
-import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
 import Linkify from "linkify-react";
-
-type Message = {
-  _id: string;
-  conversationId: string;
-  senderId: string;
-  content: string;
-  timestamp: Date;
-};
-
+import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
+import { LuSend } from "react-icons/lu";
 
 const linkifyOptions = {
-  target: '_blank',
-  rel: 'noopener noreferrer',
-  className: "underline"
+  target: "_blank",
+  rel: "noopener noreferrer",
+  className: "underline",
 };
 
-type User = { _id: string; image: string };
-type Company = {
-  _id: string;
-  imgURL: string;
-  name: string;
-  displayName: string;
-};
+export default function AdminChats() {
+  const [convos, setConvos] = useState<Array<Conversation>>([]);
 
-type Conversation = { _id: string };
+  /* Conversation Data */
+  const [activeConversation, setActiveConversation] = useState<string>("");
+  const [data, setData] = useState<ConversationMembersNames>({});
+  const [profiles, setProfiles] = useState<ConversationMembersProfiles>();
 
-export default function Page() {
-  const { data: session } = useSession({
-    required: true,
-    onUnauthenticated: () => redirect("/"),
-  });
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [data, setData] = useState<
-    Record<string, { image?: string; name?: string }>
-  >({});
-  const [activeConversation, setActiveConversation] = useState<string | null>(
-    null
-  );
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [user, setUser] = useState<Company>();
-  const [users, setUsers] = useState<Record<string, User>>({});
-  const [enteredMessage, setEnteredMessage] = useState<string>("");
-  const [company, setCompany] = useState<Company | null>(null);
+  const [users, setUsers] = useState<any>({});
+
+  const [messages, setMessages] = useState<any>([]);
+
+  /* Form Data */
+  const [enteredMessage, setEnteredMessage] = useState<any>("");
+  const [active, setActive] = useState(false);
+
+  /* Refs */
+
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const pusherRef = useRef<Pusher | null>(null);
-  const [profiles, setProfiles] = useState<
-    Record<string, { firstName: string; surname: string }>
-  >({});
 
-  const [active, setActive] = useState(false); // whether or not the emoji picker is currently open
+  const { company, billingData } = useCompany();
+  const { data: session, status } = useSession();
 
-  const onEmojiClick = (emojiData: EmojiClickData) => {
-    setEnteredMessage((prev) => prev + emojiData.emoji);
-  };
-
+  /* Fetch conversations */
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        emojiPickerRef.current &&
-        !emojiPickerRef.current.contains(event.target as Node)
-      ) {
-        setActive(false);
-      }
-    }
-    if (active) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [active]);
-
-  // Fetch logged-in-company info
-  useEffect(() => {
-    if (!session?.user?.oauthId) return;
     axios
-      .get(`/api/getUserAdminCompany?oid=${session.user.oauthId}`)
-      .then((res) => setUser(res.data))
-      .catch(console.error);
-  }, [session?.user?.oauthId]);
-
-  // ✅ Fetch conversations & other member info
-  useEffect(() => {
-    if (!session?.user?.oauthId) return;
-    if (!user) return;
-
-    axios
-      .get("/api/getCompanyConversations?companyId=" + user!._id)
-      .then(async (res) => {
-        setConversations(res.data);
+      .get(`/api/getCompanyConversations?companyId=${company?._id}`)
+      .then((res) => {
+        setConvos(res.data);
         if (res.data.length > 0 && !activeConversation) {
           setActiveConversation(res.data[0]._id);
         }
+      });
+  }, []);
 
-        const names: Record<string, { image?: string; name?: string }> = {};
-        const profiles: Record<string, { firstName: string; surname: string }> =
-          {};
+  /** FETCHING DATA FOR MESSAGING APP **/
+  useEffect(() => {
+    if (!session?.user?.oauthId) return;
+    if (!company) return;
+
+    axios
+      .get("/api/getCompanyConversations?companyId=" + company._id)
+      .then(async (res) => {
+        const names: ConversationMembersNames = {};
+        const profiles: ConversationMembersProfiles = {};
         await Promise.all(
           res.data.map(async (convo: any) => {
             const resp = await axios.get(
-              `/api/getCompanyOtherConversationMembers?companyId=${user._id}&convoID=${convo._id}`
+              `/api/getCompanyOtherConversationMembers?companyId=${company._id}&convoID=${convo._id}`
             );
             const resp2 = await axios.get(
               `/api/getUserProfile?oid=${resp.data.oauthId}`
@@ -135,9 +86,7 @@ export default function Page() {
         setProfiles(profiles);
       })
       .catch(console.error);
-  }, [session?.user?.oauthId, user]);
-
-  // chatgpt ahh code
+  }, [session?.user?.oauthId, company]);
 
   // Fetch messages for activeConversation
   useEffect(() => {
@@ -162,7 +111,7 @@ export default function Page() {
     channel.bind("newMessageEvent", (data: any) => {
       const newMessage: Message = data.newMessage;
       if (newMessage.conversationId === activeConversation) {
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev: any) => [...prev, newMessage]);
       }
     });
     return () => {
@@ -172,31 +121,29 @@ export default function Page() {
     };
   }, [activeConversation]);
 
-  // Ensure company is always defined before rendering CompanyAdminNavbar
-  useEffect(() => {
-    if (user) setCompany(user);
-  }, [user]);
   // Fetch user info for user senders
   useEffect(() => {
-    messages.forEach((msg) => {
-      if (msg.senderId !== user?._id && !users[msg.senderId]) {
+    messages.forEach((msg: Message) => {
+      if (msg.senderId !== company?._id && !users[msg.senderId]) {
         axios
           .get(`/api/getEntityById?id=${msg.senderId}`)
           .then((res) => {
-            setUsers((prev) => ({ ...prev, [msg.senderId]: res.data.data }));
+            setUsers((prev: any) => ({
+              ...prev,
+              [msg.senderId]: res.data.data,
+            }));
           })
           .catch(console.error);
       }
     });
-  }, [messages, user]);
+  }, [messages, company]);
 
-  if (!user) return <Loading />;
-
-  if (!company) return <Loading />;
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setEnteredMessage((prev: any) => prev + emojiData.emoji);
+  };
 
   return (
     <div>
-      <CompanyAdminNavbar company={company} imgURL={company.imgURL} />
       <div className="h-[calc(85vh)] flex">
         {/* Sidebar */}
         <div className="my-8 ml-8 w-[25%] h-full border border-gray-300 rounded-lg p-4">
@@ -218,7 +165,7 @@ export default function Page() {
           </div>
           <hr className="border-t border-gray-300 my-4" />
           <div className="flex flex-col space-y-4">
-            {conversations.map((convo) => (
+            {convos?.map((convo) => (
               <div
                 key={convo._id}
                 onClick={() => setActiveConversation(convo._id)}
@@ -249,11 +196,11 @@ export default function Page() {
               if (el) el.scrollTop = el.scrollHeight; // Auto-scroll to bottom
             }}
           >
-            {messages.map((message) => {
-              const isCurrent = message.senderId === company._id;
+            {messages.map((message: any) => {
+              const isCurrent = message.senderId === company?._id;
               const avatar = isCurrent
-                ? company.imgURL || "/default-avatar.png"
-                : users[message.senderId]?.image || "/default-avatar.png";
+                ? company?.imgURL || "/default-avatar.png"
+                : users[message.senderId]?.image ?? "/default-avatar.png";
 
               return (
                 <div
@@ -273,7 +220,7 @@ export default function Page() {
                     }`}
                   >
                     <Linkify options={linkifyOptions}>
-                    {message.content}
+                      {message.content}
                     </Linkify>
                     <div
                       className={`text-[10px] mt-1 text-right ${
@@ -305,7 +252,7 @@ export default function Page() {
                   if (!activeConversation || !enteredMessage.trim()) return;
                   axios.get(
                     `/api/companySendMessage?companyID=${
-                      company._id
+                      company?._id
                     }&message=${encodeURIComponent(
                       enteredMessage
                     )}&channel=${activeConversation}`
@@ -347,7 +294,7 @@ export default function Page() {
                 if (!activeConversation || !enteredMessage.trim()) return;
                 axios.get(
                   `/api/companySendMessage?companyID=${
-                    company._id
+                    company?._id
                   }&message=${encodeURIComponent(
                     enteredMessage
                   )}&channel=${activeConversation}`

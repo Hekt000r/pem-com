@@ -1,44 +1,27 @@
-"use client";
-import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
-import Navbar from "@/Components/Navbar";
-import axios from "axios";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
-import Loading from "../loading";
+"use client"
 import { ForwardRefEditor } from "@/Components/ForwardRefEditor";
-import "@mdxeditor/editor/style.css";
-import {
-  FaMapMarkedAlt,
-  FaMapMarkerAlt,
-  FaMoneyCheckAlt,
-} from "react-icons/fa";
-import { FaCity, FaRegClock } from "react-icons/fa6";
-import { MdTitle } from "react-icons/md";
-import Markdown from "react-markdown";
-import { HiMiniBuildingOffice2 } from "react-icons/hi2";
-import { TbMessageCircleFilled } from "react-icons/tb";
+import { useCompany } from "@/contexts/CompanyContext";
+import axios from "axios";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { useState } from "react";
+import { FaMapMarkerAlt, FaMoneyCheckAlt } from "react-icons/fa";
+import { FaCity, FaRegClock } from "react-icons/fa6";
+import { HiMiniBuildingOffice2 } from "react-icons/hi2";
+import { MdTitle } from "react-icons/md";
+import { TbMessageCircleFilled } from "react-icons/tb";
+import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-export default function Page() {
-  const { data: session } = useSession();
 
-  type Company = {
-    imgURL: string;
-    displayName: string;
-    name: string;
-    _id: string;
-  };
-
-  const [company, setCompany] = useState<Company | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function NewPost() {
+  const { company, billingData } = useCompany();
 
   const [title, setTitle] = useState("Titulli");
   const [city, setCity] = useState("Qyteti");
   const [location, setLocation] = useState("Lokacioni");
   const [salary, setSalary] = useState("Rroga");
 
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState("")
+
 
   const handleCreate = async () => {
     const jobData = {
@@ -69,52 +52,8 @@ export default function Page() {
     }
   };
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      if (!session?.user?.oauthId) {
-        setLoading(false);
-        redirect("/");
-        return;
-      }
-      try {
-        const res = await axios.get(
-          `/api/getUserAdminCompany?oid=${session.user.oauthId}`
-        );
-
-        if (!res.data.isAdmin) {
-          // Not an admin → redirect away
-          redirect("/");
-          return;
-        }
-
-        setCompany({
-          imgURL: res.data.company?.imgURL ?? "",
-          displayName: res.data.company?.displayName ?? "",
-          name: res.data.company?.name ?? "",
-          _id: res.data.company?._id ?? "",
-        });
-      } catch (e) {
-        console.error("Error checking admin:", e);
-        redirect("/");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (session) {
-      checkAdmin();
-    } else {
-      setLoading(false);
-    }
-  }, [session]);
-
-  if (loading) return <Loading />;
-
   return (
     <>
-      {company && company.name && (
-        <CompanyAdminNavbar imgURL={company.imgURL} company={company} />
-      )}
       <div className="m-4 p-2">
         <h1 className="font-montserrat text-2xl font-semibold">Postim i ri</h1>
       </div>

@@ -117,7 +117,7 @@ export default function Navbar({ page }: NavbarProps) {
                   </button>
 
                   {isAdmin && (
-                    <a href="/pem-admin" className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2">
+                    <a href="/admin/dashboard" className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2">
                       <MdAdminPanelSettings className="w-6 h-6" />
                       <h1 className="text-md">Admin</h1>
                     </a>
