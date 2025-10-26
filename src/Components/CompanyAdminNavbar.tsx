@@ -1,9 +1,10 @@
 import "./components.css";
 import { useState } from "react";
-import { IoPersonCircle } from "react-icons/io5";
+import { IoChatbubbleSharp, IoPersonCircle } from "react-icons/io5";
 import { FaGear, FaBookmark, FaDoorOpen } from "react-icons/fa6";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
+import { FaHome } from "react-icons/fa";
 
 interface Company {
   name: string;
@@ -21,6 +22,17 @@ export default function CompanyAdminNavbar({
   const [isVisible, setIsVisible] = useState(false);
   const { data: session } = useSession();
 
+  const activeBtnClass = `h-10 btn btn-ghost p-1 ml-2 flex text-blue-700 bg-blue-100 font-bold`
+  const inactiveBtnClass = `h-10 btn btn-ghost p-1 ml-2 flex`
+
+  const isActive = (page:string) => {
+    if (window.location.pathname == page) {
+      return true
+    } else {
+      return false
+    }
+  }
+
   return (
     <>
       <link
@@ -37,13 +49,35 @@ export default function CompanyAdminNavbar({
           <h1 className="ml-2 font-montserrat font-semibold">
             {company.displayName} Admin
           </h1>
+
+          <button className={isActive("/admin/dashboard") ? activeBtnClass : inactiveBtnClass}>
+            <a
+              href="/admin/dashboard"
+              className="justify-center h-12 flex items-center mr-2"
+            >
+              <FaHome className="m-2 w-6 h-6 text-xl" /> Ballina
+            </a>
+          </button>
+
+          <button className={isActive("/admin/chats") ? activeBtnClass : inactiveBtnClass}>
+            <a
+              href="/admin/chats"
+              className="justify-center h-12 flex items-center mr-2"
+            >
+              <IoChatbubbleSharp className="m-2 w-6 h-6 text-xl" /> Bisedimet
+            </a>
+          </button>
         </div>
         <div className="flex flex-1 justify-end items-end mr-8">
           {session ? (
             <div className="flex relative items-center justify-center h-full">
               <button className="h-10 btn btn-ghost p-1 flex ml-2 mr-2 items-center justify-center">
-                <a href="/home" className="justify-center h-12 flex items-center mr-2">
-                  <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Dil prej Admin
+                <a
+                  href="/home"
+                  className="justify-center h-12 flex items-center mr-2"
+                >
+                  <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Dil prej
+                  Admin
                 </a>
               </button>
 
@@ -91,8 +125,6 @@ export default function CompanyAdminNavbar({
             </div>
           ) : null}
         </div>
-
-        
       </div>
     </>
   );
