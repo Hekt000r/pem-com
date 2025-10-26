@@ -29,12 +29,12 @@ export async function GET(req: NextRequest) {
     conversationId: new ObjectId(channel!),
     senderId: new ObjectId(id!),
     content: message,
-    timestamp: new Date()
-  }
+    timestamp: new Date(),
+  };
 
-  const { db } = await connectToDatabase("Chat-DB")
+  const { db } = await connectToDatabase("Chat-DB");
 
-  await db.collection("Messages").insertOne(messageDocument)
+  await db.collection("Messages").insertOne(messageDocument);
 
   /* Trigger new message event, informing the clients */
 
@@ -42,5 +42,14 @@ export async function GET(req: NextRequest) {
     newMessage: messageDocument,
   });
 
-  return Response.json({"message": "success"})
+  /* Update company's billing info */
+
+  const { db: BillingDB } = await connectToDatabase("BillingDB");
+
+  await BillingDB.collection("CompanyBillingData").updateOne(
+    { companyID: new ObjectId(id!) },
+    { $inc: { messages: 1 } }
+  );
+
+  return Response.json({ message: "success" });
 }

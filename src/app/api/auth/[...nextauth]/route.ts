@@ -7,7 +7,7 @@ interface Account {
   providerAccountId: string;
 }
 
-const authOptions: AuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_ID!,

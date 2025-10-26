@@ -38,7 +38,7 @@ export default function NewPost() {
     try {
       console.table(jobData);
       await axios.get(
-        `/api/createJob?jobData=${encodeURIComponent(JSON.stringify(jobData))}`
+        `/api/createJob?jobData=${encodeURIComponent(JSON.stringify(jobData))}&companyID=${company?._id}`
       );
       alert("Postimi u krijua me sukses!");
       window.location.replace("/pem-admin");

@@ -6,7 +6,8 @@ declare global {
     name: string;
     displayName: string;
     imgURL: string;
-    _id: string;
+    _id: ObjectId;
+    Admins: ObjectId[];
   }
 
   export interface BillingPlanInfo {
@@ -37,6 +38,14 @@ declare global {
     user: {
       email: string;
     };
+  }
+
+  export interface User {
+    _id: ObjectId;
+    oauthId: string;
+    email: string;
+    name: string;
+    image: string;
   }
 
   export interface AdminProps {
