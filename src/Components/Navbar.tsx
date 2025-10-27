@@ -1,6 +1,6 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaTools } from "react-icons/fa";
 import {
   FaAddressCard,
   FaBookmark,
@@ -23,14 +23,22 @@ export default function Navbar({ page }: NavbarProps) {
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     const fetchAdminStatus = async () => {
       if (!session?.user?.oauthId) return;
 
       try {
-        const res = await axios.get(`/api/getUserAdminCompany?oid=${session.user.oauthId}`);
+        /* normal admin status */
+        const res = await axios.get(
+          `/api/getUserAdminCompany?oid=${session.user.oauthId}`
+        );
         setIsAdmin(res.data.isAdmin);
+
+        /* super admin status */
+        const res2 = await axios.get(`/api/getIsSuperAdmin`);
+        setIsSuperAdmin(res2.data.superadmin);
       } catch (err) {
         console.error("Error fetching admin status:", err);
         setIsAdmin(false);
@@ -80,7 +88,8 @@ export default function Navbar({ page }: NavbarProps) {
               <div className="flex relative">
                 <button className="h-10 btn btn-ghost p-1 flex ml-2 mr-2">
                   <h1 className="justify-center h-12 flex items-center mr-2">
-                    <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Profili im
+                    <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Profili
+                    im
                   </h1>
                 </button>
 
@@ -98,7 +107,7 @@ export default function Navbar({ page }: NavbarProps) {
                 </button>
 
                 <div
-                  className={`absolute top-12 right-0 shadow-xl border border-black rounded-2xl max-h-56 pb-4 w-56 bg-white flex flex-col items-end z-50 transition-all duration-200 ease-out
+                  className={`absolute top-12 right-0 shadow-xl border border-black rounded-2xl max-h-64 pb-4 w-56 bg-white flex flex-col items-end z-50 transition-all duration-200 ease-out
                   ${
                     isVisible
                       ? "opacity-100 scale-100 pointer-events-auto"
@@ -117,9 +126,22 @@ export default function Navbar({ page }: NavbarProps) {
                   </button>
 
                   {isAdmin && (
-                    <a href="/admin/dashboard" className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2">
+                    <a
+                      href="/admin/dashboard"
+                      className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2"
+                    >
                       <MdAdminPanelSettings className="w-6 h-6" />
                       <h1 className="text-md">Admin</h1>
+                    </a>
+                  )}
+
+                  {isSuperAdmin && (
+                    <a
+                      href="/pem-admin/"
+                      className="w-[90%] btn btn-ghost rounded-xl p-1 mt-2 h-10 justify-start mr-2 pr-2"
+                    >
+                      <FaTools className="w-5 h-5" />
+                      <h1 className="text-md">Superadmin</h1>
                     </a>
                   )}
 
