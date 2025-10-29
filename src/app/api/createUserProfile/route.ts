@@ -1,38 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { uploadCV } from "@/utils/supabase/uploadCV";
-import { UserFromOID } from "@/utils/UserFromOID";
 import { connectToDatabase } from "@/utils/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-
-    const oid = formData.get("oauthid");
-    if (!oid || typeof oid !== "string") {
-      return NextResponse.json({ error: "No OID provided" }, { status: 400 });
+    // Get the authenticated user session
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const formData = await req.formData();
 
     const profileDataRaw = formData.get("profileData");
     if (!profileDataRaw || typeof profileDataRaw !== "string") {
       return NextResponse.json({ error: "No profile data provided" }, { status: 400 });
     }
 
-    const profileData: {
-      firstName: string;
-      surName: string;
-      age: number;
-      birthday: string;
-    } = JSON.parse(profileDataRaw);
-
-    const user = await UserFromOID(oid);
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const profileData: { firstName: string; surName: string } = JSON.parse(profileDataRaw);
 
     const { db } = await connectToDatabase("Users");
     const profiles = db.collection("Userprofiles");
 
-    const existingProfile = await profiles.findOne({ userId: user._id });
+    // Use the user's email as unique identifier
+    const existingProfile = await profiles.findOne({ email: session.user.email });
     if (existingProfile) {
       return NextResponse.json({ error: "Profile already exists" }, { status: 409 });
     }
@@ -49,20 +42,19 @@ export async function POST(req: NextRequest) {
     }
 
     const profileDoc = {
-      userId: user._id,
+      email: session.user.email,
       firstName: profileData.firstName,
       surname: profileData.surName,
-      age: profileData.age,
-      birthday: profileData.birthday,
       cvPath,
       createdAt: new Date(),
     };
 
     await profiles.insertOne(profileDoc);
     await db.collection("Endusers").updateOne(
-      { _id: user._id },
+      { email: session.user.email },
       { $set: { hasProfile: true } }
-    )
+    );
+
     return NextResponse.json({ success: true, profile: profileDoc });
   } catch (e) {
     console.error(e);

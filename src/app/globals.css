@@ -1,5 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
+
+
 
 @plugin "daisyui" {
   themes: light --default
+}
+
+:root {
+  --legacy-montserrat: "Montserrat", sans-serif;
+}
+
+/* Utility class for legacy use */
+.font-legacy-montserrat {
+  font-family: var(--legacy-montserrat);
 }
