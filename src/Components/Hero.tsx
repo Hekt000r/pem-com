@@ -64,7 +64,7 @@ export default function Hero() {
 
           <div className="flex flex-1 justify-end items-center pr-4">
             <a
-              href={`/jobs?searchTerm=${searchTerm}&searchCity=${searchCity}`}
+              href={`/jobs?searchTerm=${encodeURIComponent(searchTerm)}&searchCity=${encodeURIComponent(searchCity)}`}
               className="h-10 px-6 rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold flex items-center justify-center"
               style={{ textAlign: "center" }}
             >
