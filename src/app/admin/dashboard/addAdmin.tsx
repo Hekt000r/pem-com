@@ -56,16 +56,23 @@ export function AddAdminPage({ onClose }: AddAdminPageProps) {
       return;
     }
 
-    if (!window.confirm("A jeni të sigurt? Ky përson do të bëhet Administrator.")) {
+    if (
+      !window.confirm("A jeni të sigurt? Ky përson do të bëhet Administrator.")
+    ) {
       alert("Veprimi u anulua, nuk u bënë ndryshime.");
       return;
     }
 
     try {
-      await axios.post("/api/addAdmin", {
-        companyID: company.company?._id,
-        userID: user._id,
-      });
+      alert(`Bearer ${user.token}`)
+      await axios.post(
+        "/api/addAdmin",
+        {
+          companyID: company.company?._id,
+          userID: user._id,
+        }
+      );
+
       alert("Veprimi u realizua me sukses.");
       window.location.href = "/admin/dashboard";
     } catch (error) {
@@ -97,10 +104,18 @@ export function AddAdminPage({ onClose }: AddAdminPageProps) {
 
             <div className="m-2 max-h-12">
               <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                <img className="h-11 mr-2 rounded-lg" src={user?.image || DEFAULT_AVATAR} alt="" />
+                <img
+                  className="h-11 mr-2 rounded-lg"
+                  src={user?.image || DEFAULT_AVATAR}
+                  alt=""
+                />
                 <div>
-                  <h1 className="font-montserrat font-medium">{user?.name || DEFAULT_NAME}</h1>
-                  <h2 className="font-montserrat text-sm">{user?.email || DEFAULT_EMAIL}</h2>
+                  <h1 className="font-montserrat font-medium">
+                    {user?.name || DEFAULT_NAME}
+                  </h1>
+                  <h2 className="font-montserrat text-sm">
+                    {user?.email || DEFAULT_EMAIL}
+                  </h2>
                 </div>
               </div>
             </div>

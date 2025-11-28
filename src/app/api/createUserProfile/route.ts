@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
     const profileDoc = {
       email: session.user.email,
       firstName: profileData.firstName,
+      userId: session.user.oauthId,
       surname: profileData.surName,
       cvPath,
       createdAt: new Date(),

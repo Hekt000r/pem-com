@@ -46,6 +46,7 @@ declare global {
     email: string;
     name: string;
     image: string;
+    token: JWT;
   }
 
   export interface AdminProps {
