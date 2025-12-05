@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { uploadCV } from "@/utils/supabase/uploadCV";
 import { connectToDatabase } from "@/utils/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
     const profileDoc = {
       email: session.user.email,
       firstName: profileData.firstName,
-      userId: session.user.oauthId,
+      userId: new ObjectId(session.user._id!),
       surname: profileData.surName,
       cvPath,
       createdAt: new Date(),

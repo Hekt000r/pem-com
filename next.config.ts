@@ -10,7 +10,8 @@ const nextConfig: NextConfig = {
     return config;
   },
     images: {
-    domains: ['lh3.googleusercontent.com'], // for Google profile pics
+    domains: ['lh3.googleusercontent.com', 'upload.wikimedia.org'], // for profile pics
+    
   },
 
 };
