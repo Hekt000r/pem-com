@@ -34,7 +34,9 @@ export const authOptions: AuthOptions = {
           email: credentials?.email,
         });
 
-        if (!user) return null;
+        if (!user) {
+          throw new Error("Ky email nuk ekziston.") // This e-mail does not exist.
+        }
 
         if (!user.password) {
           // User registered with Google or has no password set
@@ -49,7 +51,9 @@ export const authOptions: AuthOptions = {
           credentials.password,
           user.password
         );
-        if (!isValid) return null;
+        if (!isValid) {
+          throw new Error("Fjalëkalimi është i gabuar.") // Password is incorrect.
+        }
 
         return {
           id: user._id.toString(),
@@ -68,7 +72,7 @@ export const authOptions: AuthOptions = {
       const EndusersCollection = await db.collection("Endusers");
 
       const existingUser = await EndusersCollection.findOne({
-        oauthId: account?.providerAccountId,
+        oauthId: user.oauthId
       });
 
       if (!existingUser) {

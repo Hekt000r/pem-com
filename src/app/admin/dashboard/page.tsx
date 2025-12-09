@@ -8,18 +8,29 @@ import { FaBell, FaGraduationCap, FaMessage } from "react-icons/fa6";
 import { IoChatbubble } from "react-icons/io5";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { AddAdminPage } from "./addAdmin";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Page() {
-
-  const [adminPopupActive, setAdminPopupActive] = useState(false)
+  const [adminPopupActive, setAdminPopupActive] = useState(false);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile>();
 
   const { data: session, status } = useSession();
   const { company, billingData, admins } = useCompany();
 
+  useEffect(() => {
+    if (session) {
+      axios
+        .get(`/api/getUserProfile?oid=${session?.user.oauthId}`)
+        .then((res) => {
+          setCurrentUserProfile(res.data);
+        });
+    }
+  }, [session]);
+
   const onClose = () => {
-    setAdminPopupActive(false)
-  }
+    setAdminPopupActive(false);
+  };
 
   return (
     <>
@@ -27,7 +38,7 @@ export default function Page() {
         <div className="p-4 m-4">
           <div>
             <h1 className="font-montserrat text-3xl font-semibold">
-              Përshëndetje, {session?.user.name} !
+              Përshëndetje, {currentUserProfile?.firstName!} !
             </h1>
             <h2 className="text-gray-700 text-lg mt-2">
               Menaxho kompaninë, krijo postime, ose bisedo me klientët.
@@ -154,9 +165,12 @@ export default function Page() {
                       <h1 className="text-2xl mr-4 font-montserrat font-medium">
                         Adminët
                       </h1>
-                      <button onClick={()=>{
-                        setAdminPopupActive(!adminPopupActive)
-                      }} className="btn btn-primary">
+                      <button
+                        onClick={() => {
+                          setAdminPopupActive(!adminPopupActive);
+                        }}
+                        className="btn btn-primary"
+                      >
                         <FaPlusSquare className="w-6 h-6" /> Shto një admin
                       </button>
                     </div>
@@ -233,7 +247,11 @@ export default function Page() {
           </div>
         </div>
       </div>
-      {adminPopupActive ? <AddAdminPage onClose={() => setAdminPopupActive(false)}/> : <></>}
+      {adminPopupActive ? (
+        <AddAdminPage onClose={() => setAdminPopupActive(false)} />
+      ) : (
+        <></>
+      )}
     </>
   );
 }

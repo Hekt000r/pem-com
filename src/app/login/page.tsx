@@ -4,7 +4,7 @@ import { FaGoogle } from "react-icons/fa";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { redirect } from "next/navigation";
 import GoogleSignInButton from "@/Components/GoogleSignInButton";
-import { FaBuilding, FaBuildingUser } from "react-icons/fa6";
+import { FaBuilding, FaBuildingUser, FaEnvelope } from "react-icons/fa6";
 import Navbar from "@/Components/Navbar";
 
 export default function Login() {
@@ -18,7 +18,7 @@ export default function Login() {
        <>
        <Navbar page="none"/>
         <div className="flex justify-center items-center h-screen bg-slate-100">
-          <div className="shadow-2xl w-[30%] h-[50%] rounded-2xl bg-white border-black">
+          <div className="shadow-2xl w-[30%] min-h-[50%] rounded-2xl bg-white border-black">
             <div className="m-4 mt-8 flex flex-col items-center justify-center">
               <a href="/">
                 <img src="Logo1.svg" className="w-52" />
@@ -33,6 +33,32 @@ export default function Login() {
                   onClick={() => signIn("google")}
                   size="large"
                 />
+                              <a href="/login/credentials"
+                className="h-12 px-6 text-base
+        bg-white 
+        btn
+        border-gray-300 
+        text-gray-700 
+        font-medium 
+        hover:bg-gray-50 
+        hover:border-gray-400
+        focus:bg-gray-50
+        disabled:opacity-50 
+        disabled:cursor-not-allowed
+        transition-all 
+        duration-200
+        flex 
+        items-center 
+        justify-center 
+        gap-3
+        min-w-fit
+        w-55
+        mt-2
+        "
+              >
+                <FaEnvelope className="w-6 h-6"/>
+                Kyçu me E-mail
+              </a>
               </div>
 
               <div className="w-full flex items-center justify-center space-x-4 mt-4">

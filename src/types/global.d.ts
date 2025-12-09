@@ -49,6 +49,12 @@ declare global {
     token: JWT;
   }
 
+  export interface UserProfile {
+    email: string;
+    firstName: string;
+    surname: string;
+  }
+
   export interface AdminProps {
     BillingData: BillingData;
   }
