@@ -92,7 +92,7 @@ export default function AdminChats() {
   useEffect(() => {
     if (!activeConversation) return;
     axios
-      .get(`/api/getConversationMessages?convoID=${activeConversation}`)
+      .get(`/api/getConversationMessages?convoID=${activeConversation}&companyID=${company?._id}`)
       .then((res) => setMessages(res.data))
       .catch((err) => {
         console.error("Failed to fetch messages:", err);

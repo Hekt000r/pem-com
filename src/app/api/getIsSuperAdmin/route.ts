@@ -1,18 +1,19 @@
 import { getServerSession } from "next-auth";
 import { connectToDatabase } from "@/utils/mongodb";
 import { NextRequest } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { getToken } from "next-auth/jwt";
+import { requireUser } from "@/utils/auth/requireUser";
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  /* Check if user is authenticated */
 
-  if (!session?.user?.oauthId) {
-    return Response.json({ superadmin: false }, { status: 401 });
-  }
+  const auth = await requireUser(req);
+  if (!auth.ok) return auth.response;
+
+  const user = auth.user;
 
   const { db: UsersDB } = await connectToDatabase("Users");
   const UsersCol = UsersDB.collection("Endusers");
-  const user = await UsersCol.findOne({ oauthId: session.user.oauthId });
 
   if (!user) {
     return Response.json({ superadmin: false }, { status: 403 });

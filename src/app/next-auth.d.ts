@@ -9,17 +9,21 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       oauthId?: string;
-      token?: JWT;
+      hasProfile?: boolean; // Added hasProfile
+      token?: any;
     };
   }
 
   interface User {
     oauthId?: string;
+    hasProfile: boolean;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    oauthId?: string; // <-- Add this line
+    id?: string;
+    oauthId?: string;
+    hasProfile?: boolean;
   }
 }

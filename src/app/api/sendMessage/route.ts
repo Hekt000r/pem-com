@@ -5,6 +5,7 @@
  * channel (the convoID)
  *********/
 
+import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { UserFromOID } from "@/utils/UserFromOID";
 import { ObjectId } from "mongodb";
@@ -14,8 +15,14 @@ const Pusher = require("pusher");
 
 export async function GET(req: NextRequest) {
   const message = req.nextUrl.searchParams.get("message");
-  const oid = req.nextUrl.searchParams.get("oid");
   const channel = req.nextUrl.searchParams.get("channel");
+
+    const auth = await requireUser(req);
+    if (!auth.ok) return auth.response;
+  
+    const authUser = auth.user;
+
+    const oid = authUser.oauthId
 
   const pusher = new Pusher({
     appId: process.env.PUSHER_app_id,

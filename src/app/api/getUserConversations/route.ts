@@ -9,31 +9,31 @@
  *******************/
 
 type User = {
-    _id: string
-}
+  _id: string;
+};
 
+import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { UserFromOID } from "@/utils/UserFromOID";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const oauthid = req.nextUrl.searchParams.get("oid");
+  const auth = await requireUser(req);
+  if (!auth.ok) return auth.response;
 
-  if (!oauthid) {
-    return Response.json({ status: 404, message: "No oid given" },{status: 404});
-  }
+  const user = auth.user;
 
-  const user = await UserFromOID(oauthid);
+  const { db } = await connectToDatabase("Chat-DB");
 
-  const { db } = await connectToDatabase("Chat-DB")
+  const conversationsCol = await db.collection("Conversations");
 
-  const conversationsCol = await db.collection("Conversations")
-
-  const conversations = await conversationsCol.find({participants: user?._id}).toArray()
+  const conversations = await conversationsCol
+    .find({ participants: user?._id })
+    .toArray();
 
   if (conversations) {
-    return Response.json(conversations)
+    return Response.json(conversations);
   } else {
-    return Response.json({message: "No conversations found"})
+    return Response.json({ message: "No conversations found" });
   }
 }

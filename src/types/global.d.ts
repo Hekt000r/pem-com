@@ -47,7 +47,17 @@ declare global {
     name: string;
     image: string;
     token: JWT;
+    hasProfile: boolean;
   }
+
+  export type SafeUser = {
+    _id: string;
+    name: string;
+    email: string;
+    image: string;
+    hasProfile: boolean;
+    oauthId: string;
+  };
 
   export interface UserProfile {
     email: string;
@@ -64,17 +74,26 @@ declare global {
     participants: Array<ObjectId>;
   }
 
-  export type ConversationMembersNames = Record<string, { image?: string; name?: string }>;
-  export type ConversationMembersProfiles = Record<string, { firstName: string; surname: string }>
+  export type ConversationMembersNames = Record<
+    string,
+    { image?: string; name?: string }
+  >;
+  export type ConversationMembersProfiles = Record<
+    string,
+    { firstName: string; surname: string }
+  >;
 
   export interface Message {
     _id: string;
     content: string;
     conversationId: string;
-    senderId : string;
+    senderId: string;
     timestap: Date;
   }
 
+  export interface CustomDecodedToken {
+    oauthId: string;
+  }
 }
 
 export {};
