@@ -124,7 +124,7 @@ export default function AdminChats() {
   // Fetch user info for user senders
   useEffect(() => {
     messages.forEach((msg: Message) => {
-      if (msg.senderId !== company?._id && !users[msg.senderId]) {
+      if (msg.senderId !== company?._id?.toString() && !users[msg.senderId]) {
         axios
           .get(`/api/getEntityById?id=${msg.senderId}`)
           .then((res) => {
