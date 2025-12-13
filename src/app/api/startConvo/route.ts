@@ -17,29 +17,46 @@
  ***********/
 
 import { connectToDatabase } from "@/utils/mongodb";
-import { UserFromOID } from "@/utils/UserFromOID";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
 
+import { requireUser } from "@/utils/auth/requireUser";
+
 export async function GET(req: NextRequest) {
-    const userOAID = req.nextUrl.searchParams.get("userOID")
+    const auth = await requireUser(req);
+    
+    if (!auth.ok) {
+        return auth.response;
+    }
+
     const companyOID = req.nextUrl.searchParams.get("companyOID")
 
-    if (!userOAID || !companyOID) {
+    if (!companyOID) {
         return NextResponse.json({error: "Missing parameters"}, {status: 400} )
     }
 
-    const user = await UserFromOID(userOAID)
-
     const { db: usersDB } = await connectToDatabase("Users")
+    
+    // Validate Company ID format
+    if (!ObjectId.isValid(companyOID)) {
+          return NextResponse.json({error: "Invalid Company ID"}, {status: 400})
+    }
 
     const company = await usersDB.collection("Companies").findOne({ _id: new ObjectId(companyOID)})
 
+    if (!company) {
+        return NextResponse.json({error: "Company not found"}, {status: 404})
+    }
+
     const { db: chatDB } = await connectToDatabase("Chat-DB")
 
+    const userId = new ObjectId(auth.user._id);
+    const companyId = company._id;
+
+    // Check for existing conversation (check both orders just in case, though we create in one order)
     let convo = await chatDB.collection("Conversations").findOne({
-        participants: [user?._id, company?._id]
+        participants: { $all: [userId, companyId] }
     })
 
     if (convo) {
@@ -48,10 +65,11 @@ export async function GET(req: NextRequest) {
             convoId: convo._id
         })
     }
-    // else
 
     const newConvo = await chatDB.collection("Conversations").insertOne({
-        participants: [user?._id, company?._id]
+        participants: [userId, companyId],
+        createdAt: new Date(),
+        updatedAt: new Date()
     })
 
     return NextResponse.json({
