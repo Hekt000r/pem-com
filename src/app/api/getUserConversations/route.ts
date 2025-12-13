@@ -15,6 +15,7 @@ type User = {
 import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { UserFromOID } from "@/utils/UserFromOID";
+import { ObjectId } from "mongodb";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
   const conversationsCol = await db.collection("Conversations");
 
   const conversations = await conversationsCol
-    .find({ participants: user?._id })
+    .find({ participants: new ObjectId(user?._id) })
     .toArray();
 
   if (conversations) {

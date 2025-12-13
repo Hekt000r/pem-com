@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/utils/mongodb";
 import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { requireUser } from "@/utils/auth/requireUser";
+import { ObjectId } from "mongodb";
 
 export async function GET(req: NextRequest) {
   /* Check if user is authenticated */
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
   }
 
   const SuperAdminsCol = UsersDB.collection("Superadmins");
-  const superadmin = await SuperAdminsCol.findOne({ userID: user._id });
+  const superadmin = await SuperAdminsCol.findOne({ userID: new ObjectId(user._id) });
 
   return Response.json({ superadmin: !!superadmin });
 }
