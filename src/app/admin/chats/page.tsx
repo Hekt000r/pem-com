@@ -250,13 +250,13 @@ export default function AdminChats() {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   if (!activeConversation || !enteredMessage.trim()) return;
-                  axios.get(
-                    `/api/companySendMessage?companyID=${
-                      company?._id
-                    }&message=${encodeURIComponent(
-                      enteredMessage
-                    )}&channel=${activeConversation}`
-                  );
+                  axios.post(
+                    `/api/companySendMessage/`, {
+                      companyID: company?._id,
+                      channel: activeConversation,
+                      message: enteredMessage
+                    }
+                  )
                   setEnteredMessage("");
                 }
               }}
@@ -292,13 +292,13 @@ export default function AdminChats() {
               className="btn btn-success ml-2"
               onClick={() => {
                 if (!activeConversation || !enteredMessage.trim()) return;
-                axios.get(
-                  `/api/companySendMessage?companyID=${
-                    company?._id
-                  }&message=${encodeURIComponent(
-                    enteredMessage
-                  )}&channel=${activeConversation}`
-                );
+                  axios.post(
+                    `/api/companySendMessage/`, {
+                      companyID: company?._id,
+                      channel: activeConversation,
+                      message: enteredMessage
+                    }
+                  )
                 setEnteredMessage("");
               }}
             >

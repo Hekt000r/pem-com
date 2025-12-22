@@ -64,7 +64,6 @@ export function AddAdminPage({ onClose }: AddAdminPageProps) {
     }
 
     try {
-      alert(`Bearer ${user.token}`)
       await axios.post(
         "/api/addAdmin",
         {
