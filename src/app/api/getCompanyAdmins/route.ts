@@ -1,52 +1,43 @@
-/**********
- * /api/getCompanyAdmins
- * 
- * Params:
- * 
- * companyID:
- * ID of the company whose admins you want to get
- * 
- * Returns an array of MongoDB documents containing user information of each admin.
- **********/
-
 import { connectToDatabase } from "@/utils/mongodb";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
 export async function GET(req: NextRequest) {
-    const companyID = req.nextUrl.searchParams.get("companyID")
+    const companyID = req.nextUrl.searchParams.get("companyID");
 
-    if (!companyID) {
-        return new Response("Missing companyID", { status: 400 });
+    // 1. Quick Guard Clauses
+    if (!companyID || !ObjectId.isValid(companyID)) {
+        return NextResponse.json({ error: "Invalid Company ID" }, { status: 400 });
     }
 
-    const {db: UsersDB} = await connectToDatabase("Users")
+    try {
+        const { db } = await connectToDatabase("Users");
 
-    const company = await UsersDB.collection("Companies").findOne({_id: new ObjectId(companyID)})
+        // 2. Fetch the company first
+        const company = await db.collection("Companies").findOne({ _id: new ObjectId(companyID) });
 
-    const CompanyAdminsIds = company?.Admins
+        if (!company || !company.users) {
+            return NextResponse.json([]);
+        }
 
-    /* Return an array containing user data */
+        // 3. Extract IDs
+        const adminIds = company.users.map((u: any) => new ObjectId(u.userId));
 
-    if (!CompanyAdminsIds || !Array.isArray(CompanyAdminsIds)) {
-        return new Response(JSON.stringify([]), { status: 200 });
+        // 4. Fetch Users and Profiles in PARALLEL (Faster than sequential)
+        const [users, profiles] = await Promise.all([
+            db.collection("Endusers").find({ _id: { $in: adminIds } }).toArray(),
+            db.collection("Userprofiles").find({ userId: { $in: adminIds } }).toArray()
+        ]);
+
+        // 5. Map the data together
+        const result = adminIds.map((id: ObjectId) => ({
+            user: users.find(u => u._id.equals(id)) || null,
+            profile: profiles.find(p => p.userId.equals(id)) || null
+        }));
+
+        return NextResponse.json(result);
+
+    } catch (error) {
+        return NextResponse.json({ error: "Server Error" }, { status: 500 });
     }
-
-    const adminIds = CompanyAdminsIds.map((id: any) => new ObjectId(id));
-
-    const users = await UsersDB.collection("Endusers")
-        .find({ _id: { $in: adminIds } })
-        .toArray();
-
-    const profiles = await UsersDB.collection("Userprofiles")
-        .find({ userId: { $in: adminIds } })
-        .toArray();
-
-    const admins = adminIds.map(id => {
-        const user = users.find(u => u._id.equals(id));
-        const profile = profiles.find(p => p.userId.equals(id));
-        return { user, profile };
-    });
-
-    return new Response(JSON.stringify(admins), { status: 200 });
 }

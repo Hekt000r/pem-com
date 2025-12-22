@@ -2,12 +2,23 @@ import { ObjectId } from "mongodb";
 
 // types/global.d.ts
 declare global {
+
+  /* Company related stuff */
+
+  export type UserRole = "owner" | "admin" // user role in company
+
+  export interface CompanyUser {
+    userId: ObjectId;
+    role: UserRole;
+  }
+
   export interface Company {
     name: string;
     displayName: string;
     imgURL: string;
     _id: ObjectId;
     Admins: ObjectId[];
+    users: CompanyUser[]
   }
 
   export interface BillingPlanInfo {
