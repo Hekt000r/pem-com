@@ -25,4 +25,15 @@ Example:
 
 01_migration_type.ts
 
+### Running a migration
+
+script usage:
+
+``npx ts-node migrationRunner.ts <migration_identifier>``
+
+**NOTE:** Currently in order for this to work you have to set TS_NODE_COMPILER_OPTIONS "module" value to "commonjs"
+
+So an example command would look like this:
+
+``$env:TS_NODE_COMPILER_OPTIONS='{"module":"commonjs"}'; npx ts-node migrationRunner.ts 01_company_update_admins_array``
 
