@@ -1,5 +1,6 @@
 "use client";
 import Navbar from "@/Components/Navbar";
+import axios from "axios";
 import { useRef, useState } from "react";
 import {
   FaCheckCircle,
@@ -109,6 +110,12 @@ export default function RegisterCompany() {
       (document.getElementById("image_modal") as HTMLDialogElement).close();
     }
   };
+
+  const handleFinalSubmit = async () => {
+    const body = {name, industry, description, site, location, image, representative: {position, email, repName}}
+
+    const response = await axios.post(`/api/registerCompany`, body)
+  }
 
   const getActiveStepClass = (step: number) => {
     if (step <= currentStep) {
@@ -608,7 +615,7 @@ export default function RegisterCompany() {
                   </span>
                   
                 </div>
-                <button disabled={!TOSAgreed} className="btn btn-primary rounded-md">Përfundo</button>
+                <button onClick={handleFinalSubmit} disabled={!TOSAgreed} className="btn btn-primary rounded-md">Përfundo</button>
               </div>
             </>
           ) : (
