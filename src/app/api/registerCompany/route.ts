@@ -6,10 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, name } = body;
 
-    // 1. Basic Validation
-    if (!email || !name) {
+    if (!body) {
       return NextResponse.json(
         { error: "Missing required fields: email and name are mandatory." },
         { status: 400 }
@@ -19,15 +17,6 @@ export async function POST(req: NextRequest) {
     const { db: UsersDB } = await connectToDatabase("Users");
     const companiesCollection = UsersDB.collection("Companies");
     const magicLinksCollection = UsersDB.collection("VerificationTokens");
-
-    // 2. Check for existing registration
-    const existingCompany = await companiesCollection.findOne({ email });
-    if (existingCompany) {
-      return NextResponse.json(
-        { error: "A company with this email is already registered." },
-        { status: 409 }
-      );
-    }
 
     // 3. Prepare Company Document
     const companyDocument = {
