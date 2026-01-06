@@ -70,7 +70,7 @@ const authOptions: AuthOptions = {
           { $set: { oauthId: account.providerAccountId } }
         );
       }
-
+      
       return true;
     },
 
@@ -78,8 +78,10 @@ const authOptions: AuthOptions = {
       if (user && account?.provider === "credentials") {
         // Credentials login: user object is fully populated from authorize
         token.id = user.id;
-        token.oauthId = user.oauthId;
-        token.hasProfile = user.hasProfile;
+        token.oauthId = (user as any).oauthId;
+        token.hasProfile = (user as any).hasProfile;
+        token.companyId = (user as any).companyId;
+        token.role = (user as any).role;
       } else if (token.email) {
         // OAuth login or subsequent sessions: fetch user from DB to ensure fresh data
         const { db } = await connectToDatabase("Users");
@@ -92,6 +94,8 @@ const authOptions: AuthOptions = {
           token.hasProfile = dbUser.hasProfile;
           token.name = dbUser.name;
           token.image = dbUser.image;
+          token.companyId = dbUser.companyId?.toString();
+          token.role = dbUser.role;
         }
       }
       return token;
@@ -104,6 +108,8 @@ const authOptions: AuthOptions = {
         session.user.hasProfile = token.hasProfile as boolean;
         session.user.name = token.name as string;
         session.user.image = token.image as string;
+        (session.user as any).companyId = token.companyId;
+        (session.user as any).role = token.role;
       }
       return session;
     },

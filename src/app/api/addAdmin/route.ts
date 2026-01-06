@@ -1,65 +1,78 @@
+import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
-import { getToken } from "next-auth/jwt"; // ✅ Import the NextAuth token helper
+import { NextRequest } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const token = (await getToken({
-      req: req as any,
-    })) as CustomDecodedToken | null;
+    // 🔐 Authentication
+    const auth = await requireUser(req);
+    if (!auth.ok) return auth.response;
 
-    if (!token || !token.oauthId) {
+    const actingUserId = auth.user?._id;
+    if (!actingUserId) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized: Invalid Session" }),
-        { status: 401 }
+        JSON.stringify({ error: "User not found" }),
+        { status: 404 }
       );
     }
 
-    const oauthId = token.oauthId;
-
+    // 📦 Input validation
     const { companyID, userID } = await req.json();
-
-    if (!companyID || !userID)
+    if (!companyID || !userID) {
       return new Response(
         JSON.stringify({ error: "Missing companyID or userID" }),
         { status: 400 }
       );
+    }
 
-    const { db: UsersDB } = await connectToDatabase("Users");
-    const CompaniesCollection = UsersDB.collection("Companies");
-    const EndusersCollection = UsersDB.collection("Endusers");
+    const companyObjectId = new ObjectId(companyID);
+    const targetUserObjectId = new ObjectId(userID);
+    const actingUserObjectId = new ObjectId(actingUserId);
 
-    const actingUser = await EndusersCollection.findOne({ oauthId });
+    // 🗄️ DB
+    const { db } = await connectToDatabase("Users");
+    const Companies = db.collection("Companies");
 
-    if (!actingUser?._id)
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-      });
-
-    // AUTHORIZATION CHECK (Is the acting user an admin of the company?)
-    const company = await CompaniesCollection.findOne({
-      _id: new ObjectId(companyID),
-      // Check if the acting user's MongoDB ID is in the Admins array
-      Admins: { $in: [actingUser._id] },
+    // 🛂 Authorization: acting user must be admin of THIS company
+    const company = await Companies.findOne({
+      _id: companyObjectId,
+      users: {
+        $elemMatch: {
+          userId: actingUserObjectId,
+        },
+      },
     });
 
-    if (!company)
+    if (!company) {
       return new Response(
         JSON.stringify({ error: "Forbidden: Not a company admin" }),
         { status: 403 }
       );
+    }
 
-    // Add the target userID to the company's Admins array
-    await CompaniesCollection.updateOne(
-      { _id: new ObjectId(companyID) },
-      { $addToSet: { Admins: new ObjectId(userID) } }
+    // ➕ Promote user to admin
+    await Companies.updateOne(
+      { _id: companyObjectId },
+      {
+        $addToSet: {
+          users: {
+            userId: targetUserObjectId,
+            role: "admin",
+          },
+        },
+      }
     );
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
-  } catch (err) {
-    console.error("ADD ADMIN ERROR:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("ADD ADMIN ERROR:", error);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500 }
+    );
   }
 }

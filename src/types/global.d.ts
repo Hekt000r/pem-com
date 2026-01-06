@@ -2,12 +2,56 @@ import { ObjectId } from "mongodb";
 
 // types/global.d.ts
 declare global {
+
+  /* Company related stuff */
+
+  export enum CompanyStatus {
+    PENDING = "PENDING",
+    ACTION_REQUIRED = "ACTION_REQUIRED",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
+    AWAITING_VERIFICATION = "AWAITING_VERIFICATION"
+  }
+
+  export type CompanyVerificationMagicLink = {
+    _id: ObjectId;
+    token: string;
+    companyId: ObjectId;
+    expiresAt: Date;
+  }
+
+  export type CompanyRepresentative = {
+    position: string,
+    email: string,
+    repName: string
+  }
+
+  export type CompanyLifecycle = {
+    submittedAt: Date,
+    lastReviewedAt: Date,
+    activatedAt: Date
+  }
+
+  export type UserRole = "owner" | "admin" // user role in company
+
+  export interface CompanyUser {
+    userId: ObjectId;
+    role: UserRole;
+  }
+
   export interface Company {
     name: string;
     displayName: string;
     imgURL: string;
     _id: ObjectId;
     Admins: ObjectId[];
+    users: CompanyUser[];
+    status: CompanyStatus;
+    adminNotes: string;
+    expireAt?: Date;
+    lifecycle: CompanyLifecycle
+    representative?: CompanyRepresentative;
+    location: string;
   }
 
   export interface BillingPlanInfo {
@@ -94,6 +138,8 @@ declare global {
   export interface CustomDecodedToken {
     oauthId: string;
   }
+
+
 }
 
 export {};

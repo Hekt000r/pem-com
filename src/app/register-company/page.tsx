@@ -1,5 +1,6 @@
 "use client";
 import Navbar from "@/Components/Navbar";
+import axios, { AxiosError } from "axios";
 import { useRef, useState } from "react";
 import {
   FaCheckCircle,
@@ -17,6 +18,8 @@ import {
   FaEnvelope,
   FaLink,
 } from "react-icons/fa6";
+import SubmittedPage from "./submitted";
+import SubmitFail from "./submit-fail";
 
 export default function RegisterCompany() {
   const [image, setImage] = useState(
@@ -37,7 +40,9 @@ export default function RegisterCompany() {
   const [TOSAgreed, setTOSAgreed] = useState(false);
   const [tempImage, setTempImage] = useState("");
 
-  const [currentStep, setCurrentStep] = useState(1); // 1-3
+  const [currentStep, setCurrentStep] = useState(1); // 1-3 (4,5 aswell, those are for information. success / failure)
+
+  const [error, setError] = useState("");
 
   const modalRef = useRef<HTMLDialogElement>(null);
 
@@ -107,6 +112,26 @@ export default function RegisterCompany() {
     setImage(tempImage);
     if (document) {
       (document.getElementById("image_modal") as HTMLDialogElement).close();
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    const body = {
+      name,
+      industry,
+      description,
+      site,
+      location,
+      image,
+      representative: { position, email, repName },
+    };
+
+    try {
+      const response = await axios.post(`/api/registerCompany`, body);
+      setCurrentStep(4);
+    } catch (error: any) {
+      setError(error.message);
+      setCurrentStep(5);
     }
   };
 
@@ -592,8 +617,8 @@ export default function RegisterCompany() {
                   <input
                     type="checkbox"
                     className="checkbox checkbox-primary"
-                    onChange={(e)=>{
-                      setTOSAgreed(e.target.checked)
+                    onChange={(e) => {
+                      setTOSAgreed(e.target.checked);
                     }}
                   />
                   <span>
@@ -606,13 +631,20 @@ export default function RegisterCompany() {
                       Politikat e Privatësisë
                     </a>
                   </span>
-                  
                 </div>
-                <button disabled={!TOSAgreed} className="btn btn-primary rounded-md">Përfundo</button>
+                <button
+                  onClick={handleFinalSubmit}
+                  disabled={!TOSAgreed}
+                  className="btn btn-primary rounded-md"
+                >
+                  Përfundo
+                </button>
               </div>
             </>
+          ) : currentStep == 4 ? (
+            <SubmittedPage />
           ) : (
-            <></>
+            <SubmitFail error={error} />
           )}
 
           {/* Back & Next buttons */}
@@ -621,7 +653,7 @@ export default function RegisterCompany() {
               onClick={() => {
                 setCurrentStep(currentStep - 1);
               }}
-              disabled={currentStep <= 1}
+              disabled={currentStep <= 1 || currentStep > 3}
               className="btn btn-primary rounded-full"
             >
               {" "}

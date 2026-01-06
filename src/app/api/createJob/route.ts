@@ -1,71 +1,57 @@
-/**************
- * /api/createJob
- * Params: jobData, companyID
- * Creates a new job in Standard Jobs collection
- **************/
 import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const jobDataRaw = req.nextUrl.searchParams.get("jobData");
-  const companyID = req.nextUrl.searchParams.get("companyID");
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Extract and Validate Input
+    const { jobData, companyID } = await req.json();
 
-  /* Check if user is authenticated */
+    if (!jobData || !companyID) {
+      return NextResponse.json({ error: "Missing jobData or companyID" }, { status: 400 });
+    }
 
-  const auth = await requireUser(req);
-  if (!auth.ok) return auth.response;
+    // 2. Authentication
+    const auth = await requireUser(req);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
-  const user = auth.user;
-
-  /* Check if user is authorized to post a job in that company */
-
-  const { db: UsersDB } = await connectToDatabase("Users");
-
-  const EndusersCollection = await UsersDB.collection("Endusers");
-  const CompaniesCollection = await UsersDB.collection("Companies");
-
-  const actingUser = await EndusersCollection.findOne({ oauthId: user.oauthId });
-
-  if (!actingUser?._id)
-    return new Response(JSON.stringify({ error: "User not found" }), {
-      status: 404,
+    // 3. Authorization Check
+    const { db: UsersDB } = await connectToDatabase("Users");
+    
+    // Check if the user is in the 'users' array of the specific company
+    const company = await UsersDB.collection("Companies").findOne({
+      _id: new ObjectId(companyID),
+      users: {
+        $elemMatch: {
+          userId: new ObjectId(user._id),
+        },
+      },
     });
 
-  const company = await CompaniesCollection.findOne({
-    _id: new ObjectId(companyID!),
-    // Check if the acting user's MongoDB ID is in the Admins array
-    Admins: { $in: [actingUser._id] },
-  });
+    if (!company) {
+      return NextResponse.json({ error: "Forbidden: Not a company member" }, { status: 403 });
+    }
 
-  if (!company)
-    return new Response(
-      JSON.stringify({ error: "Forbidden: Not a company admin" }),
-      { status: 403 }
+    // 4. Create Job
+    const { db: JobsDB } = await connectToDatabase("Jobs");
+    const jobsCollection = JobsDB.collection("Standard");
+
+    const result = await jobsCollection.insertOne(jobData);
+
+    // 5. Update Company Billing Data
+    const { db: BillingDB } = await connectToDatabase("BillingDB");
+    await BillingDB.collection("CompanyBillingData").updateOne(
+      { companyID: new ObjectId(companyID) },
+      { $inc: { posts: 1 } },
+      { upsert: true }
     );
 
-  if (!jobDataRaw) {
-    return new Response("No jobData provided.", { status: 400 });
+    return NextResponse.json({ success: true, jobId: result.insertedId });
+
+  } catch (error) {
+    console.error("API Error [createJob]:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  const jobData = JSON.parse(jobDataRaw);
-
-  const { db } = await connectToDatabase("Jobs");
-  const jobsCollection = db.collection("Standard");
-
-  await jobsCollection.insertOne(jobData);
-
-  /* Update company billing data */
-  const { db: BillingDB } = await connectToDatabase("BillingDB");
-  await BillingDB.collection("CompanyBillingData").updateOne(
-    { companyID: new ObjectId(companyID!) },
-    { $inc: { posts: 1 } }
-  );
-
-  return new Response(JSON.stringify({ status: 200 }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
 }

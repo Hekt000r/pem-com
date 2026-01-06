@@ -1,90 +1,75 @@
-/**********
- * /api/companySendMessage
- * params:
- * companyID (the id of the company who sent the message)
- * channel (the id of the convo where the message was sent)
- * message
- *
- ***************/
-
 import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
-import { getToken } from "next-auth/jwt";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import Pusher from "pusher";
 
-const Pusher = require("pusher");
+// Initialize Pusher outside the handler or in a separate util file
+const pusher = new Pusher({
+  appId: process.env.PUSHER_app_id!,
+  key: process.env.NEXT_PUBLIC_PUSHER_key!,
+  secret: process.env.PUSHER_secret!,
+  cluster: process.env.PUSHER_cluster!,
+});
 
-export async function GET(req: NextRequest) {
-  const message = req.nextUrl.searchParams.get("message");
-  const id = req.nextUrl.searchParams.get("companyID");
-  const channel = req.nextUrl.searchParams.get("channel");
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Extract and Validate Input
+    const { companyID, channel, message } = await req.json();
 
-  /* Check if authenticated */
+    if (!companyID || !channel || !message) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
 
-  const auth = await requireUser(req);
-  if (!auth.ok) return auth.response;
+    // 2. Authentication
+    const auth = await requireUser(req);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
-  const user = auth.user;
-
-  const { db: UsersDB } = await connectToDatabase("Users");
-
-  const EndusersCollection = await UsersDB.collection("Endusers");
-  const CompaniesCollection = await UsersDB.collection("Companies");
-
-  /* Check if user is authorized in company (must be admin) */
-
-  const actingUser = await EndusersCollection.findOne({ oauthId: user.oauthId });
-
-  if (!actingUser?._id)
-    return new Response(JSON.stringify({ error: "User not found" }), {
-      status: 404,
+    // 3. Authorization Check
+    const { db: UsersDB } = await connectToDatabase("Users");
+    
+    // We check if the user is in the Admins array of the specific company
+    const company = await UsersDB.collection("Companies").findOne({
+      users: {
+        $elemMatch: {
+          userId: new ObjectId(user._id),
+        },
+      },
     });
 
-  const company = await CompaniesCollection.findOne({
-    _id: new ObjectId(id!),
-    // Check if the acting user's MongoDB ID is in the Admins array
-    Admins: { $in: [actingUser._id] },
-  });
+    if (!company) {
+      return NextResponse.json({ error: "Forbidden: Not a company admin" }, { status: 403 });
+    }
 
-  if (!company)
-    return new Response(
-      JSON.stringify({ error: "Forbidden: Not a company admin" }),
-      { status: 403 }
+    // 4. Save Message
+    const { db: ChatDB } = await connectToDatabase("Chat-DB");
+    const messageDocument = {
+      conversationId: new ObjectId(channel),
+      senderId: new ObjectId(companyID),
+      content: message,
+      timestamp: new Date(),
+    };
+
+    await ChatDB.collection("Messages").insertOne(messageDocument);
+
+    // 5. Trigger Real-time Event
+    await pusher.trigger(channel, "newMessageEvent", {
+      newMessage: messageDocument,
+    });
+
+    // 6. Update Billing (Fire and forget or await depending on priority)
+    const { db: BillingDB } = await connectToDatabase("BillingDB");
+    await BillingDB.collection("CompanyBillingData").updateOne(
+      { companyID: new ObjectId(companyID) },
+      { $inc: { messages: 1 } },
+      { upsert: true } // Creates record if it doesn't exist
     );
 
-  const pusher = new Pusher({
-    appId: process.env.PUSHER_app_id,
-    key: process.env.NEXT_PUBLIC_PUSHER_key,
-    secret: process.env.PUSHER_secret,
-    cluster: process.env.PUSHER_cluster,
-  });
+    return NextResponse.json({ success: true, messageId: messageDocument.conversationId });
 
-  const messageDocument = {
-    conversationId: new ObjectId(channel!),
-    senderId: new ObjectId(id!),
-    content: message,
-    timestamp: new Date(),
-  };
-
-  const { db } = await connectToDatabase("Chat-DB");
-
-  await db.collection("Messages").insertOne(messageDocument);
-
-  /* Trigger new message event, informing the clients */
-
-  pusher.trigger(channel, "newMessageEvent", {
-    newMessage: messageDocument,
-  });
-
-  /* Update company's billing info */
-
-  const { db: BillingDB } = await connectToDatabase("BillingDB");
-
-  await BillingDB.collection("CompanyBillingData").updateOne(
-    { companyID: new ObjectId(id!) },
-    { $inc: { messages: 1 } }
-  );
-
-  return Response.json({ message: "success" });
+  } catch (error) {
+    console.error("API Error [companySendMessage]:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

@@ -1,9 +1,5 @@
 /***************
  * /api/getConversationMessages
- *
- * params:
- * convoID: ID of the conversation
- * companyID: id of the company [optional] [if enduser, then dont provide]
  ***************/
 
 import { connectToDatabase } from "@/utils/mongodb";
@@ -14,68 +10,62 @@ import { requireUser } from "@/utils/auth/requireUser";
 export async function GET(req: NextRequest) {
   const auth = await requireUser(req);
   if (!auth.ok) return auth.response;
-  const user: SafeUser = auth.user;
+  const user = auth.user;
 
-  // Get convoID and optional companyID
   const convoID = req.nextUrl.searchParams.get("convoID");
   const companyID = req.nextUrl.searchParams.get("companyID");
 
   if (!convoID) {
-    return Response.json({ error: "Conversation not found" }, { status: 404 });
+    return Response.json({ error: "Conversation ID is required" }, { status: 400 });
   }
 
   let convoObjectId: ObjectId;
+  let companyObjectId: ObjectId | null = null;
+
   try {
     convoObjectId = new ObjectId(convoID);
+    if (companyID) companyObjectId = new ObjectId(companyID);
   } catch {
-    return Response.json({ error: "Conversation not found" }, { status: 404 });
+    return Response.json({ error: "Invalid ID format" }, { status: 400 });
   }
 
   const { db: UsersDB } = await connectToDatabase("Users");
   const { db: ChatDB } = await connectToDatabase("Chat-DB");
 
-  // If acting on behalf of a company, check admin access
-  if (companyID) {
-    let companyObjectId: ObjectId;
-    try {
-      companyObjectId = new ObjectId(companyID);
-    } catch {
-      return Response.json({ error: "Invalid companyId" }, { status: 400 });
-    }
-
+  // 1. If acting as a company, verify the user is in that company's Users array
+  if (companyObjectId) {
     const company = await UsersDB.collection("Companies").findOne({
       _id: companyObjectId,
-      Admins: new ObjectId(user._id), // Assuming each company has an 'admins' array
+      users: { 
+        $elemMatch: { userId: new ObjectId(user._id) } 
+      },
     });
 
     if (!company) {
-      return Response.json({ error: "Forbidden" }, { status: 405 });
+      return Response.json({ error: "Forbidden: You are not a member of this company" }, { status: 403 });
     }
   }
 
-  // Build participant check
-  const participantCheck: any = companyID
-    ? { participants: new ObjectId(companyID) } // acting as company
-    : { participants: new ObjectId(user._id) }; // acting as user
-
-  // Fetch the conversation
-
-  console.table({ _id: convoObjectId, ...participantCheck });
+  // 2. Build participant check
+  // If companyID exists, we check if the company is a participant. 
+  // Otherwise, we check if the individual user is a participant.
+  const participantId = companyObjectId || new ObjectId(user._id);
 
   const convo = await ChatDB.collection("Conversations").findOne({
     _id: convoObjectId,
-    ...participantCheck,
+    participants: participantId,
   });
 
   if (!convo) {
-    return Response.json({ error: "Conversation not found" }, { status: 401 });
+    return Response.json({ error: "Conversation not found or access denied" }, { status: 404 });
   }
 
-  // Fetch messages
+  // 3. Fetch messages
   const limit = Math.min(
     Number(req.nextUrl.searchParams.get("limit")) || 50,
     100
   );
+
   const messages = await ChatDB.collection("Messages")
     .find(
       { conversationId: convoObjectId },
@@ -84,7 +74,6 @@ export async function GET(req: NextRequest) {
     .sort({ timestamp: 1 })
     .limit(limit)
     .toArray();
-    
 
   return Response.json(messages);
 }
