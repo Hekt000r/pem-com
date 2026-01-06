@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Permission Check (Superadmin)
     const superadminUser = await SuperadminsCollection.findOne({
-      userID: user._id,
+      userID: new ObjectId(user._id),
     });
 
     if (!superadminUser) {
