@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const companiesCollection = UsersDB.collection("Companies");
     const tokensCollection = UsersDB.collection("VerificationTokens");
 
-    const magicLink = await tokensCollection.findOneAndDelete({ token });
+    const magicLink = await tokensCollection.findOne({ token });
 
     if (!magicLink) {
       return NextResponse.json(
@@ -42,15 +42,39 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    if (result.matchedCount === 0) {
+    const company = await companiesCollection.findOne({ _id: magicLink.companyId });
+
+    if (!company) {
       return NextResponse.json(
         { error: "Associated company record not found." },
         { status: 404 }
       );
     }
 
+    const { db: UsersDB_2 } = await connectToDatabase("Users");
+    const endusersCollection = UsersDB_2.collection("Endusers");
+    const existingUser = await endusersCollection.findOne({ email: company.representative.email });
+
+    if (existingUser) {
+      // 1. Link existing user as owner
+      await companiesCollection.updateOne(
+        { _id: company._id },
+        { $set: { ownerId: existingUser._id } }
+      );
+      // 2. Delete the token since verification is complete
+      await tokensCollection.deleteOne({ token });
+    }
+
     return NextResponse.json(
-      { message: "Company verified successfully." },
+      { 
+        message: "Company verified successfully.",
+        company: {
+          id: company._id,
+          name: company.name,
+          representative: company.representative
+        },
+        userExists: !!existingUser
+      },
       { status: 200 }
     );
 

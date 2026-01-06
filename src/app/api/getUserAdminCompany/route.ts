@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     if (!company) {
       return NextResponse.json(
         { company: null, isAdmin: false, message: "No admin permissions found." },
-        { status: 403 }
+        { status: 200 }
       );
     }
 
