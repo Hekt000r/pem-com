@@ -29,12 +29,12 @@ export const authOptions: AuthOptions = {
 
         const user = await EndusersCollection.findOne({ email: credentials.email });
 
-        if (!user) throw new Error("Ky email nuk ekziston."); // Email does not exist
+        if (!user) throw new Error("Fjalëkalimi ose email-i është i gabuar"); // Password or email is wrong
 
         if (!user.password) return null; // User registered via OAuth, no password
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) throw new Error("Fjalëkalimi është i gabuar."); // Incorrect password
+        if (!isValid) throw new Error("Fjalëkalimi ose email-i është i gabuar"); // Incorrect password
 
         return {
           id: user._id.toString(),
