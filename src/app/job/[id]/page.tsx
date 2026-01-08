@@ -58,7 +58,7 @@ export default function Page({
   const {data: session, status } = useSession()
 
   const handleConvoStart = () => {
-    axios.get(`/api/startConvo?userOID=${session?.user.oauthId}&companyOID=${company?._id}`).then((res) => {
+    axios.post(`/api/startConvo`, {companyOID: company?._id}).then((res) => {
       if (res.data.convoId) {
         redirect(`/chats?jumpTo=${res.data.convoId}`)
       }

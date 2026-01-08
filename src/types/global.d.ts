@@ -42,6 +42,9 @@ declare global {
   export interface Company {
     name: string;
     displayName: string;
+    industry: string;
+    description: string;
+    site: string;
     imgURL: string;
     _id: ObjectId;
     Admins: ObjectId[];

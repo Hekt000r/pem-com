@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body: Company = await req.json();
 
     if (!body) {
       return NextResponse.json(
@@ -20,7 +20,13 @@ export async function POST(req: NextRequest) {
 
     // 3. Prepare Company Document
     const companyDocument = {
-      ...body,
+      name: body.name,
+      industry: body.industry,
+      description: body.description,
+      site: body.site,
+      location: body.location,
+      imgURL: body.imgURL,
+      representative: body.representative,
       status: "AWAITING_VERIFICATION",
       lifecycle: {
         submittedAt: new Date(),

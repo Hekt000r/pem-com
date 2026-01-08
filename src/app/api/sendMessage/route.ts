@@ -1,74 +1,71 @@
 /***************
  * /api/sendMessage
  * params: message (the text for message)
- * oid (user oauth id)
  * channel (the convoID)
  *********/
 
 import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
-import { UserFromOID } from "@/utils/UserFromOID";
 import { ObjectId } from "mongodb";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import Pusher from "pusher";
 
-const Pusher = require("pusher");
+const pusher = new Pusher({
+  appId: process.env.PUSHER_app_id!,
+  key: process.env.NEXT_PUBLIC_PUSHER_key!,
+  secret: process.env.PUSHER_secret!,
+  cluster: process.env.PUSHER_cluster!,
+});
 
-export async function GET(req: NextRequest) {
-  const message = req.nextUrl.searchParams.get("message");
-  const channel = req.nextUrl.searchParams.get("channel");
+export async function POST(req: NextRequest) {
+  try {
+    const { message, channel } = await req.json();
+
+    if (!message || !channel) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!ObjectId.isValid(channel)) {
+      return NextResponse.json({ error: "Invalid channel ID" }, { status: 400 });
+    }
 
     const auth = await requireUser(req);
     if (!auth.ok) return auth.response;
-  
+
     const authUser = auth.user;
+    const userId = new ObjectId(authUser._id);
 
-    const oid = authUser.oauthId
+    /* 1. Authorization: Check if user is part of the conversation */
+    const { db: chatDB } = await connectToDatabase("Chat-DB");
+    const conversation = await chatDB.collection("Conversations").findOne({
+      _id: new ObjectId(channel),
+      participants: userId,
+    });
 
-  const pusher = new Pusher({
-    appId: process.env.PUSHER_app_id,
-    key: process.env.NEXT_PUBLIC_PUSHER_key,
-    secret: process.env.PUSHER_secret,
-    cluster: process.env.PUSHER_cluster,
-  });
+    if (!conversation) {
+      return NextResponse.json({ error: "Unauthorized: You are not part of this conversation" }, { status: 403 });
+    }
 
-  /* Get the user that created post */
+    /* 2. Create the message document */
+    const messagesCol = chatDB.collection("Messages");
+    const messageDocument = {
+      conversationId: new ObjectId(channel),
+      senderId: userId,
+      content: message,
+      timestamp: new Date(),
+    };
 
-  let senderObjectId;
+    /* 3. Insert into DB */
+    await messagesCol.insertOne(messageDocument);
 
-  const user = await UserFromOID(oid!);
-  if (user) {
-    senderObjectId = user._id;
-  } else {
-    // If no user, treat as company: find company by admin's OAuth ID
-    const { db } = await connectToDatabase("Users");
-    const company = await db
-      .collection("Companies")
-      .findOne({ Admins: oid });
-    if (!company) return new Response("Company not found", { status: 404 });
-    senderObjectId = company._id;
+    /* 4. Trigger Pusher event */
+    await pusher.trigger(channel, "newMessageEvent", {
+      newMessage: messageDocument,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("API Error [sendMessage]:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  /* Create the message document */
-
-  const { db } = await connectToDatabase("Chat-DB");
-  const messagesCol = await db.collection("Messages");
-
-  const messageDocument = {
-    conversationId: new ObjectId(channel!),
-    senderId: new ObjectId(senderObjectId),
-    content: message,
-    timestamp: new Date(),
-  };
-
-  /* insert into DB */
-
-  const insertedMessage = await messagesCol.insertOne(messageDocument);
-
-  /* Trigger new message event, informing the clients */
-
-  pusher.trigger(channel, "newMessageEvent", {
-    newMessage: messageDocument,
-  });
-
-  return Response.json({ status: 200 });
 }

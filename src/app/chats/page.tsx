@@ -319,13 +319,10 @@ export default function Page() {
               className="btn btn-success ml-2"
               onClick={() => {
                 if (!activeConversation || !enteredMessage.trim()) return;
-                axios.get(
-                  `/api/sendMessage?oid=${
-                    session?.user.oauthId
-                  }&message=${encodeURIComponent(
-                    enteredMessage
-                  )}&channel=${activeConversation}`
-                );
+                axios.post(`/api/sendMessage`, {
+                  message: enteredMessage,
+                  channel: activeConversation
+                })
                 setEnteredMessage("");
               }}
             >
