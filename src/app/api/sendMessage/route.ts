@@ -4,11 +4,12 @@
  * channel (the convoID)
  *********/
 
-import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import pusher from "@/utils/pusher";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,11 +23,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid channel ID" }, { status: 400 });
     }
 
-    const auth = await requireUser(req);
-    if (!auth.ok) return auth.response;
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?._id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const authUser = auth.user;
-    const userId = new ObjectId(authUser._id);
+    const userId = new ObjectId(session.user._id);
 
     /* 1. Authorization: Check if user is part of the conversation */
     const { db: chatDB } = await connectToDatabase("Chat-DB");
