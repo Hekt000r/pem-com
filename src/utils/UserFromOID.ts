@@ -11,7 +11,10 @@ export async function UserFromOID(oid: string) {
     const {db} = await connectToDatabase("Users")
     const col: Collection = db.collection("Endusers")
 
-    const user = await col.findOne({oauthId: oid})
+    const user = await col.findOne(
+        { oauthId: oid },
+        { projection: { password: 0, oauthId: 0 } }
+    )
 
     return user
 }

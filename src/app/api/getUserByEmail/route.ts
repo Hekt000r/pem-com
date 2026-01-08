@@ -17,7 +17,10 @@ export async function GET(req: NextRequest) {
 
     const {db: UsersDB} = await connectToDatabase("Users")
 
-    const user = await UsersDB.collection("Endusers").findOne({email: email})
+    const user = await UsersDB.collection("Endusers").findOne(
+        { email: email },
+        { projection: { password: 0, oauthId: 0 } }
+    )
 
     return Response.json(user)
 }

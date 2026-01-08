@@ -43,23 +43,26 @@ export async function POST(req: NextRequest) {
 
     // If not found in basic membership, check if user is an admin for any company involved
     if (!conversation) {
-        // Find if this user is an admin of any company
         const { db: usersDB } = await connectToDatabase("Users");
-        const company = await usersDB.collection("Companies").findOne({
-            "users.userId": userId
+        
+        // Find all companies where the user is an admin or owner
+        const userCompanies = await usersDB.collection("Companies")
+            .find({ "users.userId": userId })
+            .toArray();
+
+        if (userCompanies.length === 0) {
+            return new NextResponse("Forbidden", { status: 403 });
+        }
+
+        const companyIds = userCompanies.map(c => c._id);
+
+        // Check if any of these companies is a participant in the conversation
+        const adminConvo = await chatDB.collection("Conversations").findOne({
+            _id: new ObjectId(conversationId),
+            participants: { $in: companyIds }
         });
 
-        if (company) {
-            // Check if the company is a participant in this conversation
-            const adminConvo = await chatDB.collection("Conversations").findOne({
-                _id: new ObjectId(conversationId),
-                participants: company._id
-            });
-            
-            if (!adminConvo) {
-                return new NextResponse("Forbidden", { status: 403 });
-            }
-        } else {
+        if (!adminConvo) {
             return new NextResponse("Forbidden", { status: 403 });
         }
     }

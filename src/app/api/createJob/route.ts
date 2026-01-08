@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       users: {
         $elemMatch: {
           userId: new ObjectId(user._id),
+          role: { $in: ["admin", "owner"] },
         },
       },
     });

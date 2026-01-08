@@ -9,7 +9,10 @@ export async function GET(req: NextRequest) {
 
   const { db } = await connectToDatabase("Users");
 
-  const user = await db.collection("Endusers").findOne({ _id: new ObjectId(id) });
+  const user = await db.collection("Endusers").findOne(
+    { _id: new ObjectId(id) },
+    { projection: { password: 0, oauthId: 0 } }
+  );
   if (user) return Response.json({ type: "user", data: user });
 
   const company = await db.collection("Companies").findOne({ _id: new ObjectId(id) });

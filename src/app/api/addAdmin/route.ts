@@ -53,6 +53,15 @@ export async function POST(req: NextRequest) {
     }
 
     // ➕ Promote user to admin
+    // First, remove user from array to avoid duplicates if they already exist with a different role
+    await Companies.updateOne(
+      { _id: companyObjectId },
+      {
+        $pull: { users: { userId: targetUserObjectId } } as any
+      }
+    );
+
+    // Then add the new role
     await Companies.updateOne(
       { _id: companyObjectId },
       {
