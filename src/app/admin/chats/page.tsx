@@ -105,9 +105,10 @@ export default function AdminChats() {
     }
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_key!, {
       cluster: "eu",
+      authEndpoint: "/api/pusher/auth",
     });
     pusherRef.current = pusher;
-    const channel = pusher.subscribe(activeConversation);
+    const channel = pusher.subscribe(`private-chat-${activeConversation}`);
     channel.bind("newMessageEvent", (data: any) => {
       const newMessage: Message = data.newMessage;
       if (newMessage.conversationId === activeConversation) {
@@ -116,7 +117,7 @@ export default function AdminChats() {
     });
     return () => {
       channel.unbind_all();
-      pusher.unsubscribe(activeConversation);
+      pusher.unsubscribe(`private-chat-${activeConversation}`);
       pusher.disconnect();
     };
   }, [activeConversation]);

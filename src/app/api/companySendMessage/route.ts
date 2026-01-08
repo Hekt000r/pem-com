@@ -2,15 +2,7 @@ import { requireUser } from "@/utils/auth/requireUser";
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
-import Pusher from "pusher";
-
-// Initialize Pusher outside the handler or in a separate util file
-const pusher = new Pusher({
-  appId: process.env.PUSHER_app_id!,
-  key: process.env.NEXT_PUBLIC_PUSHER_key!,
-  secret: process.env.PUSHER_secret!,
-  cluster: process.env.PUSHER_cluster!,
-});
+import pusher from "@/utils/pusher";
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,7 +46,7 @@ export async function POST(req: NextRequest) {
     await ChatDB.collection("Messages").insertOne(messageDocument);
 
     // 5. Trigger Real-time Event
-    await pusher.trigger(channel, "newMessageEvent", {
+    await pusher.trigger(`private-chat-${channel}`, "newMessageEvent", {
       newMessage: messageDocument,
     });
 

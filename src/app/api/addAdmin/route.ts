@@ -34,19 +34,20 @@ export async function POST(req: NextRequest) {
     const { db } = await connectToDatabase("Users");
     const Companies = db.collection("Companies");
 
-    // 🛂 Authorization: acting user must be admin of THIS company
+    // 🛂 Authorization: acting user must be admin or owner of THIS company
     const company = await Companies.findOne({
       _id: companyObjectId,
       users: {
         $elemMatch: {
           userId: actingUserObjectId,
+          role: { $in: ["admin", "owner"] },
         },
       },
     });
 
     if (!company) {
       return new Response(
-        JSON.stringify({ error: "Forbidden: Not a company admin" }),
+        JSON.stringify({ error: "Forbidden: Not a company admin or owner" }),
         { status: 403 }
       );
     }
