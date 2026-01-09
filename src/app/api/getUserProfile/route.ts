@@ -18,7 +18,10 @@ export async function GET(req: NextRequest) {
 
     const { db } = await connectToDatabase("Users")
 
-    const UserProfile = await db.collection("Userprofiles").findOne({userId: User?._id})
+    const UserProfile = await db.collection("Userprofiles").findOne(
+        { userId: User?._id },
+        { projection: { userId: 0 } }
+    )
 
     return Response.json(UserProfile)
 }

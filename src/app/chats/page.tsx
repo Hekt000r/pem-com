@@ -134,9 +134,10 @@ export default function Page() {
     }
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_key!, {
       cluster: "eu",
+      authEndpoint: "/api/pusher/auth",
     });
     pusherRef.current = pusher;
-    const channel = pusher.subscribe(activeConversation);
+    const channel = pusher.subscribe(`private-chat-${activeConversation}`);
     channel.bind("newMessageEvent", (data: any) => {
       const newMessage: Message = data.newMessage;
       if (newMessage.conversationId === activeConversation) {
@@ -145,7 +146,7 @@ export default function Page() {
     });
     return () => {
       channel.unbind_all();
-      pusher.unsubscribe(activeConversation);
+      pusher.unsubscribe(`private-chat-${activeConversation}`);
       pusher.disconnect();
     };
   }, [activeConversation]);
@@ -319,13 +320,10 @@ export default function Page() {
               className="btn btn-success ml-2"
               onClick={() => {
                 if (!activeConversation || !enteredMessage.trim()) return;
-                axios.get(
-                  `/api/sendMessage?oid=${
-                    session?.user.oauthId
-                  }&message=${encodeURIComponent(
-                    enteredMessage
-                  )}&channel=${activeConversation}`
-                );
+                axios.post(`/api/sendMessage`, {
+                  message: enteredMessage,
+                  channel: activeConversation
+                })
                 setEnteredMessage("");
               }}
             >

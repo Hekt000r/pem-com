@@ -24,13 +24,18 @@
  * paid for and is active
  */
 
+import { requireUser } from "@/utils/auth/requireUser"; // Import requireUser
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server"; // Import NextResponse
 
 export async function GET(req: NextRequest) {
+    // 1. Authentication Check
+    const auth = await requireUser(req);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
-    /* 1. Get the company */
+    /* 2. Get the company */
     const companyID = req.nextUrl.searchParams.get("companyID")
 
     if (!companyID) {
@@ -39,7 +44,20 @@ export async function GET(req: NextRequest) {
 
     const {db: UsersDB} = await connectToDatabase("Users")
 
-    const company = await UsersDB.collection("Companies").findOne({_id: new ObjectId(companyID)})
+    // 3. Authorization Check: Ensure user belongs to this company AND is an admin/owner
+    const company = await UsersDB.collection("Companies").findOne({
+        _id: new ObjectId(companyID),
+        users: { 
+            $elemMatch: { 
+                userId: new ObjectId(user._id),
+                role: { $in: ["admin", "owner"] }
+            } 
+        }
+    });
+
+    if (!company) {
+        return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+    }
 
     /* 2. Get the company's plan and usage */
 

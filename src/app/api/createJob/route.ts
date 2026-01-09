@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
       users: {
         $elemMatch: {
           userId: new ObjectId(user._id),
+          role: { $in: ["admin", "owner"] },
         },
       },
     });
@@ -38,7 +39,17 @@ export async function POST(req: NextRequest) {
     const { db: JobsDB } = await connectToDatabase("Jobs");
     const jobsCollection = JobsDB.collection("Standard");
 
-    const result = await jobsCollection.insertOne(jobData);
+    const result = await jobsCollection.insertOne({
+      title: jobData.title,
+      company_id: companyID,
+      Location: jobData.Location,
+      salary: jobData.salary,
+      description: jobData.description,
+      company_displayName: company.displayName,
+      thumbnail: jobData.thumbnail,
+      city: jobData.city,
+      createdAt: new Date()
+    });
 
     // 5. Update Company Billing Data
     const { db: BillingDB } = await connectToDatabase("BillingDB");

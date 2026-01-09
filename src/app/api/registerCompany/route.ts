@@ -5,11 +5,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body: Company = await req.json();
 
-    if (!body) {
+    if (
+      !body ||
+      !body.name || 
+      !body.industry || 
+      !body.description || 
+      !body.representative || 
+      !body.representative.email || 
+      !body.representative.repName
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: email and name are mandatory." },
+        { error: "Missing required fields: name, industry, description, and representative details are mandatory." },
         { status: 400 }
       );
     }
@@ -20,7 +28,13 @@ export async function POST(req: NextRequest) {
 
     // 3. Prepare Company Document
     const companyDocument = {
-      ...body,
+      name: body.name,
+      industry: body.industry,
+      description: body.description,
+      site: body.site,
+      location: body.location,
+      imgURL: body.imgURL,
+      representative: body.representative,
       status: "AWAITING_VERIFICATION",
       lifecycle: {
         submittedAt: new Date(),
