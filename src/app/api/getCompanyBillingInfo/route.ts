@@ -44,10 +44,15 @@ export async function GET(req: NextRequest) {
 
     const {db: UsersDB} = await connectToDatabase("Users")
 
-    // 3. Authorization Check: Ensure user belongs to this company
+    // 3. Authorization Check: Ensure user belongs to this company AND is an admin/owner
     const company = await UsersDB.collection("Companies").findOne({
         _id: new ObjectId(companyID),
-        users: { $elemMatch: { userId: new ObjectId(user._id) } }
+        users: { 
+            $elemMatch: { 
+                userId: new ObjectId(user._id),
+                role: { $in: ["admin", "owner"] }
+            } 
+        }
     });
 
     if (!company) {

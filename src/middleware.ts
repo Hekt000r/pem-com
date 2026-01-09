@@ -22,7 +22,7 @@ export default withAuth(
         ];
 
         // Check if the current path is in the public routes list
-        const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+        const isPublicRoute = publicRoutes.includes(pathname);
 
         // If it's a public route or the user has a token, authorize
         return isPublicRoute || !!token;

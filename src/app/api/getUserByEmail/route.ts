@@ -26,7 +26,12 @@ export async function GET(req: NextRequest) {
     // Authorization: Check if the requester belongs to at least one company
     // This implies they are a business user potentially looking to invite someone
     const requesterCompany = await UsersDB.collection("Companies").findOne({
-        "users.userId": new ObjectId(user._id)
+        users: { 
+            $elemMatch: { 
+                userId: new ObjectId(user._id),
+                role: { $in: ["admin", "owner"] }
+            } 
+        }
     });
 
     if (!requesterCompany) {

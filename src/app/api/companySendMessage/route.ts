@@ -27,8 +27,7 @@ export async function POST(req: NextRequest) {
       users: {
         $elemMatch: {
           userId: new ObjectId(user._id),
-          // We can also enforce role here if needed, but presence in the list implies *some* permission
-          // role: { $in: ["admin", "owner"] } 
+          role: { $in: ["admin", "owner"] } 
         },
       },
     });
@@ -39,6 +38,17 @@ export async function POST(req: NextRequest) {
 
     // 4. Save Message
     const { db: ChatDB } = await connectToDatabase("Chat-DB");
+
+    // Fix IDOR: Ensure company is part of the conversation
+    const conversation = await ChatDB.collection("Conversations").findOne({
+        _id: new ObjectId(channel),
+        participants: new ObjectId(companyID) 
+    });
+
+    if (!conversation) {
+         return NextResponse.json({ error: "Forbidden: Company not part of this conversation" }, { status: 403 });
+    }
+
     const messageDocument = {
       conversationId: new ObjectId(channel),
       senderId: new ObjectId(companyID),
