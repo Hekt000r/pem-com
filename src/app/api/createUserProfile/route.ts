@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { uploadCV } from "@/utils/supabase/uploadCV";
 import { connectToDatabase } from "@/utils/mongodb";
 import { ObjectId } from "mongodb";
-import { getToken } from "next-auth/jwt";
 import { requireUser } from "@/utils/auth/requireUser";
 
 export async function POST(req: NextRequest) {
@@ -47,26 +44,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const cvFile = formData.get("file");
-    let cvPath: string | null = null;
-
-    if (cvFile && cvFile instanceof File) {
-      try {
-        cvPath = await uploadCV(cvFile);
-      } catch (uploadError: any) {
-        return NextResponse.json(
-          { error: "CV upload failed: " + uploadError.message },
-          { status: 500 }
-        );
-      }
-    }
 
     const profileDoc = {
       email: user.email,
       firstName: profileData.firstName,
       userId: new ObjectId(user._id!),
       surname: profileData.surName,
-      cvPath,
       createdAt: new Date(),
     };
 

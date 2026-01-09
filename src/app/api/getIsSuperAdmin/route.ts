@@ -1,7 +1,5 @@
-import { getServerSession } from "next-auth";
 import { connectToDatabase } from "@/utils/mongodb";
 import { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 import { requireUser } from "@/utils/auth/requireUser";
 import { ObjectId } from "mongodb";
 
