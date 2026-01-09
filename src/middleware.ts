@@ -15,10 +15,10 @@ export default withAuth(
           "/api/getJobs",
           "/api/getCompanyByID",
           "/api/getEntityById",
-          "/api/getUserProfile",
+          // "/api/getUserProfile", // Removed to prevent scraping (Issue #4)
           "/api/searchJobs",
           "/api/registerCredentialsUser",
-          "/api/companyVerifyMagicLink", // Adding this based on file list as it's likely auth-related
+          "/api/companyVerifyMagicLink", 
         ];
 
         // Check if the current path is in the public routes list

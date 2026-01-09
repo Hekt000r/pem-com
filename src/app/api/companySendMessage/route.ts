@@ -23,9 +23,12 @@ export async function POST(req: NextRequest) {
     
     // We check if the user is in the Admins array of the specific company
     const company = await UsersDB.collection("Companies").findOne({
+      _id: new ObjectId(companyID),
       users: {
         $elemMatch: {
           userId: new ObjectId(user._id),
+          // We can also enforce role here if needed, but presence in the list implies *some* permission
+          // role: { $in: ["admin", "owner"] } 
         },
       },
     });

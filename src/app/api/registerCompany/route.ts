@@ -7,9 +7,17 @@ export async function POST(req: NextRequest) {
   try {
     const body: Company = await req.json();
 
-    if (!body) {
+    if (
+      !body ||
+      !body.name || 
+      !body.industry || 
+      !body.description || 
+      !body.representative || 
+      !body.representative.email || 
+      !body.representative.repName
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: email and name are mandatory." },
+        { error: "Missing required fields: name, industry, description, and representative details are mandatory." },
         { status: 400 }
       );
     }
