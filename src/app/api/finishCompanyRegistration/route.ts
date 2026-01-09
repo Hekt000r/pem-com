@@ -85,12 +85,19 @@ export async function POST(req: NextRequest) {
     const userResult = await endusersCollection.insertOne(newUser);
 
     // 5. Update Company with Owner ID
+    // 5. Update Company with Owner ID and add to users array
     await companiesCollection.updateOne(
       { _id: company._id },
       {
         $set: {
           ownerId: userResult.insertedId,
           status: "PENDING", // Ensure it's marked as pending for admin approval
+        },
+        $addToSet: {
+          users: {
+            userId: userResult.insertedId,
+            role: "owner",
+          },
         },
       }
     );
