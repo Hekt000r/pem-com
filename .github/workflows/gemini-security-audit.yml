@@ -1,4 +1,4 @@
-name: Codebase Security Scan with Gemini 3
+name: Gemini 3 Security Audit
 
 on:
   push:
