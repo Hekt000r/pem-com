@@ -11,10 +11,9 @@ export async function POST(req: NextRequest) {
 
     const actingUserId = auth.user?._id;
     if (!actingUserId) {
-      return new Response(
-        JSON.stringify({ error: "User not found" }),
-        { status: 404 }
-      );
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+      });
     }
 
     // 📦 Input validation
@@ -52,37 +51,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ➕ Promote user to admin
-    // First, remove user from array to avoid duplicates if they already exist with a different role
-    await Companies.updateOne(
-      { _id: companyObjectId },
-      {
-        $pull: { users: { userId: targetUserObjectId } } as any
-      }
+    // To be sure, check if the user already exists
+    // 1. Try to update the existing user's role
+    const result = await Companies.updateOne(
+      { _id: companyObjectId, "users.userId": targetUserObjectId },
+      { $set: { "users.$.role": "admin" } }
     );
 
-    // Then add the new role
-    await Companies.updateOne(
-      { _id: companyObjectId },
-      {
-        $addToSet: {
-          users: {
-            userId: targetUserObjectId,
-            role: "admin",
+    // 2. If no document was matched, it means the user isn't in the list yet.
+    //    So, we add them.
+    if (result.matchedCount === 0) {
+      await Companies.updateOne(
+        { _id: companyObjectId },
+        {
+          $addToSet: {
+            users: {
+              userId: targetUserObjectId,
+              role: "admin",
+            },
           },
-        },
-      }
-    );
+        }
+      );
+    }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200 }
-    );
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error("ADD ADMIN ERROR:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+    });
   }
 }
