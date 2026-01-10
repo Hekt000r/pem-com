@@ -9,128 +9,128 @@ interface AddAdminPageProps {
 
 const DEFAULT_NAME = "Emri";
 const DEFAULT_EMAIL = "EmriMbiemri@webfaqja.com";
-const DEFAULT_AVATAR =
-  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541";
+const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541";
 
 export function AddAdminPage({ onClose }: AddAdminPageProps) {
   const company = useCompany();
 
   const [email, setEmail] = useState("");
-  const [user, setUser] = useState<User | null>(null);
-  const [isValidUser, setIsValidUser] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
+  // 1. Debounce the email input to save API calls
   useEffect(() => {
-    if (!email) {
+    if (!email || !email.includes("@")) {
       setUser(null);
-      setIsValidUser(false);
+      setHasSearched(false);
       return;
     }
 
-    const fetchUser = async () => {
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true);
       try {
-        const res = await axios.get<User>(`/api/getUserByEmail?email=${email}`);
-        if (res.data) {
-          setUser(res.data);
-          setIsValidUser(true);
-        } else {
-          setUser(null);
-          setIsValidUser(false);
-        }
+        const res = await axios.get(`/api/getUserByEmail?email=${email}`);
+        setUser(res.data || null);
       } catch (error) {
         console.error("Error fetching user:", error);
         setUser(null);
-        setIsValidUser(false);
+      } finally {
+        setIsSearching(false);
+        setHasSearched(true);
       }
-    };
+    }, 500); // Wait 500ms after user stops typing
 
-    fetchUser();
+    return () => clearTimeout(delayDebounceFn);
   }, [email]);
 
   const handleSubmit = async () => {
-    if (!isValidUser || !user?._id) {
-      alert("Përdoruesi i shënuar nuk ekziston.");
-      return;
-    }
+    if (!user?._id) return;
 
-    if (
-      !window.confirm("A jeni të sigurt? Ky përson do të bëhet Administrator.")
-    ) {
-      alert("Veprimi u anulua, nuk u bënë ndryshime.");
+    if (!window.confirm(`A jeni të sigurt? ${user.name} do të bëhet Administrator.`)) {
       return;
     }
 
     try {
-      await axios.post(
-        "/api/addAdmin",
-        {
-          companyID: company.company?._id,
-          userID: user._id,
-        }
-      );
+      await axios.post("/api/addAdmin", {
+        companyID: company.company?._id,
+        userID: user._id,
+      });
 
       alert("Veprimi u realizua me sukses.");
-      window.location.href = "/admin/dashboard";
+      window.location.reload(); // More reliable than href for simple state updates
     } catch (error) {
-      console.error("Error adding admin:", error);
-      alert("Ndodhi një gabim gjatë përpjekjes për të shtuar administratorin.");
+      alert("Ndodhi një gabim gjatë shtimit të administratorit.");
     }
   };
 
+  // Determine UI State
+  const isInvalid = hasSearched && !user && !isSearching;
+
   return (
-    <>
-      {/* Backdrop (dark transparent background) */}
-      <div className="fixed inset-0 shadow-2xl bg-black/10 flex items-center justify-center z-50">
-        {/* Popup box */}
-        <div className="bg-white rounded-2xl shadow-xl p-4 w-[90%] max-w-md">
-          {/* Fields & Forms */}
-          <div>
-            <h1 className="text-2xl font-semibold mb-4">
-              Shto një Administrator
-            </h1>
-            <p className="text-gray-600">Email-i i personit</p>
-            <input
-              type="text"
-              placeholder="emri@webfaqja.com"
-              className="input"
-              onChange={handleInputChange}
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-md border border-gray-100">
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">Shto një Administrator</h1>
+
+        {/* Input Field with DaisyUI Validation */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-medium text-gray-600">Email-i i personit</span>
+          </label>
+          <input
+            type="email"
+            placeholder="emri@webfaqja.com"
+            className={`input input-bordered w-full transition-all ${
+              isInvalid ? "input-error" : user ? "input-success" : ""
+            }`}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          {isSearching && <span className="loading loading-dots loading-xs mt-2 ml-2"></span>}
+          {isInvalid && (
+            <label className="label">
+              <span className="label-text-alt text-error font-medium">Ky email nuk është i regjistruar.</span>
+            </label>
+          )}
+        </div>
+
+        {/* User Preview Section */}
+        <div className="mt-6">
+          <p className="text-sm font-medium text-gray-500 mb-2">Parapamja</p>
+          <div className={`flex items-center gap-4 p-3 rounded-xl border transition-all ${
+            user ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200 opacity-60"
+          }`}>
+            <img
+              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+              src={user?.image || DEFAULT_AVATAR}
+              alt="Avatar"
             />
-
-            <p className="text-gray-600">Parapamja</p>
-
-            <div className="m-2 max-h-12">
-              <div className="flex bg-base-200 outline-1 outline-gray-300 rounded-md p-1">
-                <img
-                  className="h-11 mr-2 rounded-lg"
-                  src={user?.image || DEFAULT_AVATAR}
-                  alt=""
-                />
-                <div>
-                  <h1 className="font-montserrat font-medium">
-                    {user?.name || DEFAULT_NAME}
-                  </h1>
-                  <h2 className="font-montserrat text-sm">
-                    {user?.email || DEFAULT_EMAIL}
-                  </h2>
-                </div>
-              </div>
+            <div className="overflow-hidden">
+              <h1 className="font-bold text-gray-800 truncate">
+                {user?.name || DEFAULT_NAME}
+              </h1>
+              <h2 className="text-sm text-gray-500 truncate">
+                {user?.email || DEFAULT_EMAIL}
+              </h2>
             </div>
           </div>
-          <div className="mt-4 flex">
-            <button onClick={handleSubmit} className="btn btn-primary ">
-              {" "}
-              <FaPlusSquare className="w-6 h-6" /> Përfundo
-            </button>
+        </div>
 
-            <button className="btn btn-error ml-4" onClick={onClose}>
-              <FaWindowClose className="w-6 h-6" /> Mbyll
-            </button>
-          </div>
+        {/* Action Buttons */}
+        <div className="mt-8 flex gap-3">
+          <button 
+            onClick={handleSubmit} 
+            disabled={!user || isSearching}
+            className="btn btn-primary flex-1 gap-2"
+          >
+            <FaPlusSquare className="text-lg" /> Përfundo
+          </button>
+
+          <button className="btn btn-error flex-1 gap-2" onClick={onClose}>
+            <FaWindowClose className="text-lg" /> Mbyll
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
