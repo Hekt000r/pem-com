@@ -2,17 +2,27 @@
 
 @import "tailwindcss";
 
-
-
+/* 1. Add daisyUI as a plugin */
 @plugin "daisyui" {
-  themes: light --default
+  themes: light --default;
 }
 
-:root {
-  --legacy-montserrat: "Montserrat", sans-serif;
+/* 2. Wrap custom variables and overrides in the @theme block or @layer */
+@theme {
+  --font-montserrat: "Montserrat", sans-serif;
 }
 
-/* Utility class for legacy use */
-.font-legacy-montserrat {
-  font-family: var(--legacy-montserrat);
+/* 3. Wrap your custom utilities in the utilities layer */
+@layer utilities {
+  .font-legacy-montserrat {
+    font-family: var(--font-montserrat);
+  }
+}
+
+/* 4. Global overrides (if needed) */
+@layer base {
+  :root {
+    /* If corners are still square, manually re-assert the daisyUI variable here */
+    --rounded-btn: 0.5rem; 
+  }
 }
