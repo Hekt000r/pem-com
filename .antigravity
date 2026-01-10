@@ -1,0 +1,28 @@
+Rules for developing on the PEM codebase
+
+1. The platform:
+PEM is a site to find jobs in Albanian Regions (Albania, Kosovo, North Macedonia and beyond)
+The site primary language is Albanian
+In this site, users can sign up using Oauth2 or Email and search for jobs and apply
+There is a built in chatting system use to communicate with employers in different jobs
+Companies can also register on their own, but an admin has to approve them
+
+2. Coding style:
+
+Commenting Rules:
+- Avoid overusing comments
+- Avoid using comments when the code is readable and usable just fine
+- Keep comments clean and concise
+
+3. Coding Rules:
+
+Backend rules:
+- Always use Typescript
+- Use JWT-based authentication (there is a requireUser util for this) instead of getServerSession
+- Always make sure your code is secure and has no logical mistakes
+
+Frontend rules:
+- Font Montserrat is the primary font (with font-medium font weight)
+- Use DaisyUI buttons where possible (Primary, Danger, etc. But dont forget to add rounded-sm or rounded-md since daisyui default rounding is broken)
+- Keep a consistent style similar to the rest of the site
+- Avoid massive components (400+ lines), split components if that's the best solution
