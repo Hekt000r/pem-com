@@ -7,6 +7,8 @@ import axios from "axios";
 import Loading from "@/Components/Loading";
 import CompanyAdminNavbar from "@/Components/CompanyAdminNavbar";
 import { CompanyProvider } from "@/contexts/CompanyContext";
+import PendingVerification from "@/Components/Admin/PendingVerification";
+import BillingSelector from "@/Components/Admin/BillingSelector";
 
 export default function AdminLayout({ children }: any) {
   const [loading, setLoading] = useState(true);
@@ -43,11 +45,6 @@ export default function AdminLayout({ children }: any) {
         );
 
         const billingInfo = billingRes.data?.CompanyBillingInfo;
-        if (!billingInfo || billingInfo.active === false) {
-          router.replace("/login");
-          return;
-        }
-
         setBillingData(billingRes.data);
 
         // 3️⃣ Get admins for this company
@@ -82,10 +79,25 @@ export default function AdminLayout({ children }: any) {
     return <Loading />;
   }
 
+  const isApproved = company.status === "APPROVED";
+  const isBillingActive = billingData?.CompanyBillingInfo?.active === true;
+
   return (
-    <CompanyProvider company={company} billingData={billingData} admins={admins ?? null}>
-      <CompanyAdminNavbar imgURL={company.imgURL} company={company} />
-      {children}
+    <CompanyProvider
+      company={company}
+      billingData={billingData}
+      admins={admins ?? null}
+    >
+      {isApproved && isBillingActive && (
+        <CompanyAdminNavbar imgURL={company.imgURL} company={company} />
+      )}
+      {!isApproved ? (
+        <PendingVerification companyName={company.name} />
+      ) : !isBillingActive ? (
+        <BillingSelector companyName={company.name} />
+      ) : (
+        children
+      )}
     </CompanyProvider>
   );
 }
