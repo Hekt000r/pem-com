@@ -18,18 +18,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Fetch all history so git diff can compare against parent commits
           fetch-depth: 0 
 
       - name: Get Changed Files Diff
         id: diff
         run: |
           if [ "${{ github.event_name }}" == "pull_request" ]; then
-            # Compare PR branch to its base branch (e.g. main)
             git diff origin/${{ github.base_ref }}...HEAD > changes.diff
           else
-            # For pushes, compare current commit to the previous one
-            # Handles the very first commit case with || true
             git diff HEAD~1 HEAD > changes.diff || touch changes.diff
           fi
           
@@ -40,40 +36,35 @@ jobs:
           fi
 
       - name: Run Gemini 3 Flash Security Scan
-        # Only run if there are actual code changes to scan
         if: env.HAS_CHANGES == 'true'
         uses: google-github-actions/run-gemini-cli@v0.1.18
         with:
-          # Corrected 2026 input names
           gemini_model: 'gemini-3-flash'
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          prompt: |
-            You are a Senior Security Engineer auditing a job portal for the Albanian Regions.
-            Analyze the following git diff for security vulnerabilities:
-            1. SQL Injection (especially in search/filter logic).
-            2. Hardcoded secrets/API keys.
-            3. Insecure data handling (GDPR/regional privacy).
-            4. Broken Access Control.
-
-            Provide findings in a concise Markdown table. If clean, say "No security issues detected."
-
-            DIFF DATA:
-            $(cat changes.diff)
+          # We pass a minimal JSON settings to enable non-interactive/YOLO mode
+          settings: |
+            {
+              "yolo": true,
+              "nonInteractive": true
+            }
+          # This is the "Positional Argument" fix:
+          # We provide the instructions directly to the CLI command
+          # while using the action's context.
+        run: |
+          PROMPT="Analyze this git diff for security vulnerabilities in a Markdown table. Focus on SQLi, hardcoded keys, and Albanian data privacy. DIFF: $(cat changes.diff)"
+          gemini "$PROMPT" > gemini_report.md
         id: gemini_scan
 
       - name: Comment on PR
-        # Only comment if it's a PR and Gemini found something to say
-        if: github.event_name == 'pull_request' && steps.gemini_scan.outputs.text != ''
+        if: github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
             ### 🛡️ Gemini 3 Security Audit Findings
-            ${{ steps.gemini_scan.outputs.text }}
+            $(cat gemini_report.md)
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Job Summary
-        # Always output the findings to the GitHub Actions "Summary" page
-        if: steps.gemini_scan.outputs.text != ''
         run: |
           echo "## 🛡️ Gemini 3 Security Report" >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.gemini_scan.outputs.text }}" >> $GITHUB_STEP_SUMMARY
+          cat gemini_report.md >> $GITHUB_STEP_SUMMARY
