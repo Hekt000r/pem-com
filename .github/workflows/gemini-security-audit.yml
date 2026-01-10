@@ -2,8 +2,7 @@ name: Gemini 3 Security Audit
 
 on:
   push:
-    branches: 
-      - '**'
+    branches: ['**']
   pull_request:
     types: [opened, synchronize]
 
@@ -29,42 +28,71 @@ jobs:
             git diff HEAD~1 HEAD > changes.diff || touch changes.diff
           fi
           
+          # Check if diff is empty or just whitespace
           if [ -s changes.diff ]; then
             echo "HAS_CHANGES=true" >> $GITHUB_ENV
           else
             echo "HAS_CHANGES=false" >> $GITHUB_ENV
           fi
 
-      - name: Run Gemini 3 Flash Security Scan
+      - name: Setup Python
         if: env.HAS_CHANGES == 'true'
-        uses: google-github-actions/run-gemini-cli@v0.1.18
+        uses: actions/setup-python@v5
         with:
-          gemini_model: 'gemini-3-flash'
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          # We pass a minimal JSON settings to enable non-interactive/YOLO mode
-          settings: |
-            {
-              "yolo": true,
-              "nonInteractive": true
-            }
-          # This is the "Positional Argument" fix:
-          # We provide the instructions directly to the CLI command
-          # while using the action's context.
-        run: |
-          PROMPT="Analyze this git diff for security vulnerabilities in a Markdown table. Focus on SQLi, hardcoded keys, and Albanian data privacy. DIFF: $(cat changes.diff)"
-          gemini "$PROMPT" > gemini_report.md
-        id: gemini_scan
+          python-version: '3.x'
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
+      - name: Install Google GenAI SDK
+        if: env.HAS_CHANGES == 'true'
+        run: pip install google-generativeai
+
+      - name: Run Gemini Security Scan (Python)
+        if: env.HAS_CHANGES == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python -c "
+          import os
+          import google.generativeai as genai
+
+          # Configure the SDK
+          genai.configure(api_key=os.environ['GEMINI_API_KEY'])
+          
+          # Initialize Gemini 3 Flash
+          model = genai.GenerativeModel('gemini-3-flash')
+          
+          # Read the Diff
+          with open('changes.diff', 'r') as f:
+              diff_text = f.read()
+
+          # Safe Prompt Construction
+          prompt = f'''
+          You are a Senior Security Engineer. Audit this git diff for vulnerabilities.
+          Focus on: SQL Injection, Hardcoded Secrets, and Albanian Data Privacy compliance.
+          Output a concise Markdown table. If no issues, say 'No security issues detected'.
+
+          DIFF DATA:
+          {diff_text}
+          '''
+
+          # Generate and Save
+          try:
+              response = model.generate_content(prompt)
+              with open('gemini_report.md', 'w') as f:
+                  f.write(response.text)
+          except Exception as e:
+              print(f'Error generating content: {e}')
+              exit(1)
+          "
+
+      - name: Post Comment on PR
+        if: github.event_name == 'pull_request' && env.HAS_CHANGES == 'true'
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: |
-            ### 🛡️ Gemini 3 Security Audit Findings
-            $(cat gemini_report.md)
+          filePath: gemini_report.md
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Job Summary
+        if: env.HAS_CHANGES == 'true'
         run: |
-          echo "## 🛡️ Gemini 3 Security Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 🛡️ Gemini 3 Security Audit" >> $GITHUB_STEP_SUMMARY
           cat gemini_report.md >> $GITHUB_STEP_SUMMARY
