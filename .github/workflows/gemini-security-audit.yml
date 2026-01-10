@@ -2,7 +2,8 @@ name: Gemini 3 Security Audit
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: 
+    - '**'
   pull_request:
     types: [opened, synchronize]
 
