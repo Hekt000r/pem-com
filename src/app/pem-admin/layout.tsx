@@ -32,8 +32,8 @@ export default function SuperAdminLayout({ children }: any) {
   if (loading) return <Loading />;
 
   return (
-    <div className="flex">
-      <div className="h-screen w-64 border-gray-300 border-1 shadow-2xl p-3 pt-6 space-y-2">
+    <div className="flex h-screen overflow-hidden">
+      <div className="h-screen w-64 flex-shrink-0 border-gray-300 border-1 shadow-2xl p-3 pt-6 space-y-2 overflow-y-auto">
         <div>
           <a
             href="/pem-admin/home"
@@ -74,7 +74,9 @@ export default function SuperAdminLayout({ children }: any) {
           </a>
         </div>
       </div>
-      {children}
+      <div className="flex-1 h-screen overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }

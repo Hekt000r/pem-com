@@ -107,7 +107,7 @@ function VerifyTokenContent() {
               <div className="text-center mb-6">
                 <p className="font-bold text-xl mb-1">Caktoni fjalëkalimin</p>
                 <p className="text-base-content/70 text-sm">
-                  Për të përfunduar regjistrimin e {companyInfo?.name}, ju
+                  Për të përfunduar regjistrimin e kompanisë {companyInfo?.name}, ju
                   lutemi caktoni një fjalëkalim për llogarinë tuaj.
                 </p>
               </div>
@@ -146,28 +146,28 @@ function VerifyTokenContent() {
                 }}
                 className="space-y-4"
               >
-                <div className="flex flex-col justify-center space-y-2">
-                  <div className="flex flex-col w-full items-start space-x-2">
-                    <span className="text-gray-700 font-legacy-montserrat font-medium">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="flex flex-col w-full max-w-xs items-start">
+                    <span className="text-gray-700 font-legacy-montserrat font-medium mb-1">
                       Email-i:
                     </span>
-                    <label className="label input border-gray-300 rounded-sm validator">
-                      <FaEnvelope />
+                    <label className="label input border-gray-300 rounded-sm validator flex items-center gap-2 w-full">
+                      <FaEnvelope className="text-gray-400" />
                       <input
                         type="text"
-                        className=""
+                        className="grow"
                         value={companyInfo?.representative?.email}
                         disabled
                       />
                     </label>
                   </div>
 
-                  <div className="">
-                    <p className="label-text text-gray-600">Fjalëkalimi i ri</p>
-                    <label className="input rounded-sm input-flex flex pr-0 flex-row items-start">
+                  <div className="flex flex-col w-full max-w-xs items-start">
+                    <p className="label-text text-gray-600 mb-1">Fjalëkalimi i ri</p>
+                    <label className="input rounded-sm flex items-center gap-2 w-full">
                       <input
                         type={showPassword ? "text" : "password"}
-                        className=""
+                        className="grow"
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -178,7 +178,7 @@ function VerifyTokenContent() {
                           e.preventDefault();
                           setShowPassword(!showPassword);
                         }}
-                        className="btn btn-ghost ml-auto"
+                        className="btn btn-ghost btn-xs"
                       >
                         {showPassword ? (
                           <FaEyeSlash className="h-4 w-4" />
@@ -189,14 +189,14 @@ function VerifyTokenContent() {
                     </label>
                   </div>
 
-                  <div className="form-control">
-                    <p className="label-text text-gray-600">
+                  <div className="flex flex-col w-full max-w-xs items-start">
+                    <p className="label-text text-gray-600 mb-1">
                       Konfirmo fjalëkalimin
                     </p>
-                    <label className="input rounded-sm input-flex flex pr-0 flex-row items-start">
+                    <label className="input rounded-sm flex items-center gap-2 w-full">
                       <input
                         type={showPassword ? "text" : "password"}
-                        className=""
+                        className="grow"
                         placeholder="••••••••"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
