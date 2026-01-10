@@ -29,10 +29,10 @@ jobs:
 
       - name: Run Gemini 3 Flash Security Scan
         if: success()
-        uses: google-github-actions/run-gemini-cli@v1
+        uses: google-github-actions/run-gemini-cli@v0.1.18
         with:
           # We use Flash for speed and cost-efficiency
-          model: 'gemini-1.5-flash' 
+          model: 'gemini-3-flash' 
           api_key: ${{ secrets.GEMINI_API_KEY }}
           # The system instructions for the security persona
           prompt: |
