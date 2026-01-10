@@ -28,7 +28,7 @@ jobs:
             git diff HEAD~1 HEAD > changes.diff || touch changes.diff
           fi
           
-          # Check if diff is empty or just whitespace
+          # Check if diff is empty
           if [ -s changes.diff ]; then
             echo "HAS_CHANGES=true" >> $GITHUB_ENV
           else
@@ -41,30 +41,28 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Google GenAI SDK
+      - name: Install Google GenAI SDK (New Standard)
         if: env.HAS_CHANGES == 'true'
-        run: pip install google-generativeai
+        # We install the NEW package, not the deprecated one
+        run: pip install -U google-genai
 
-      - name: Run Gemini Security Scan (Python)
+      - name: Run Gemini Security Scan
         if: env.HAS_CHANGES == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python -c "
           import os
-          import google.generativeai as genai
-
-          # Configure the SDK
-          genai.configure(api_key=os.environ['GEMINI_API_KEY'])
+          from google import genai
           
-          # Initialize Gemini 3 Flash
-          model = genai.GenerativeModel('gemini-3-flash')
+          # 1. Initialize the new Client (2026 standard)
+          client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
           
-          # Read the Diff
+          # 2. Read the Diff
           with open('changes.diff', 'r') as f:
               diff_text = f.read()
 
-          # Safe Prompt Construction
+          # 3. Construct the prompt
           prompt = f'''
           You are a Senior Security Engineer. Audit this git diff for vulnerabilities.
           Focus on: SQL Injection, Hardcoded Secrets, and Albanian Data Privacy compliance.
@@ -74,13 +72,18 @@ jobs:
           {diff_text}
           '''
 
-          # Generate and Save
           try:
-              response = model.generate_content(prompt)
+              # 4. Call the new API method with the correct model ID
+              response = client.models.generate_content(
+                  model='gemini-3-flash-preview', 
+                  contents=prompt
+              )
+              
               with open('gemini_report.md', 'w') as f:
                   f.write(response.text)
+                  
           except Exception as e:
-              print(f'Error generating content: {e}')
+              print(f'Gemini API Error: {e}')
               exit(1)
           "
 
