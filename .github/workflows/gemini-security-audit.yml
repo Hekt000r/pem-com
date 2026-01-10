@@ -1,0 +1,58 @@
+name: Gemini 3 Security Audit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Required to get the diff
+
+      - name: Get Changed Files Diff
+        id: diff
+        run: |
+          # Get the diff of the latest commit/PR changes
+          git diff HEAD^ HEAD > changes.diff
+          echo "DIFF_EXIST=$(id -s changes.diff)" >> $GITHUB_ENV
+
+      - name: Run Gemini 3 Flash Security Scan
+        if: success()
+        uses: google-github-actions/run-gemini-cli@v1
+        with:
+          # We use Flash for speed and cost-efficiency
+          model: 'gemini-1.5-flash' 
+          api_key: ${{ secrets.GEMINI_API_KEY }}
+          # The system instructions for the security persona
+          prompt: |
+            You are a Senior Security Engineer. Analyze the following git diff for security vulnerabilities 
+            specifically focusing on:
+            1. SQL Injection or insecure database queries.
+            2. Hardcoded secrets or API keys.
+            3. Insecure data handling (especially for Albanian user data).
+            4. Broken Access Control.
+            
+            Provide the output in a concise Markdown table. If no issues are found, state "No security issues detected."
+            
+            DIFF DATA:
+            $(cat changes.diff)
+        id: gemini_scan
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.gemini_scan.outputs.text != ''
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ### 🛡️ Gemini 3 Security Audit Findings
+            ${{ steps.gemini_scan.outputs.text }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
