@@ -4,7 +4,7 @@ import { useCompany } from "@/contexts/CompanyContext";
 import axios from "axios";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { useState } from "react";
-import { FaMapMarkerAlt, FaMoneyCheckAlt } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaMoneyCheckAlt } from "react-icons/fa";
 import { FaCity, FaRegClock } from "react-icons/fa6";
 import { HiMiniBuildingOffice2 } from "react-icons/hi2";
 import { MdTitle } from "react-icons/md";
@@ -19,8 +19,16 @@ export default function NewPost() {
   const [city, setCity] = useState("Qyteti");
   const [location, setLocation] = useState("Lokacioni");
   const [salary, setSalary] = useState("Rroga");
+  const [expiredAt, setExpiredAt] = useState("");
 
   const [description, setDescription] = useState("")
+  const [isDateFocused, setIsDateFocused] = useState(false);
+
+  const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}/${month}/${year}`;
+  };
 
 
   const handleCreate = async () => {
@@ -34,7 +42,22 @@ export default function NewPost() {
       thumbnail: company?.imgURL,
       company_id: company?._id,
       createdAt: new Date(),
+      expiredAt: expiredAt,
     };
+
+    if (!expiredAt) {
+      alert("Ju lutem zgjidhni një datë skadimi.");
+      return;
+    }
+
+    const expiryDate = new Date(expiredAt);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (expiryDate < today) {
+      alert("Data e skadimit nuk mund të jetë në të kaluarën.");
+      return;
+    }
+
     try {
       console.table(jobData);
       await axios.post("/api/createJob", {
@@ -258,19 +281,40 @@ export default function NewPost() {
           <h1 className="text-2xl font-montserrat font-semibold">
             Gati për ta postuar?
           </h1>
-          <button
-            onClick={() => {
-              const modal = document.getElementById(
-                "my_modal_1"
-              ) as HTMLDialogElement | null;
-              if (modal) {
-                modal.showModal();
-              }
-            }}
-            className="btn btn-primary btn-lg btn-wide"
-          >
-            Posto
-          </button>
+          <div className="flex items-center space-x-4">
+            <label className="input input-lg w-full max-w-xs">
+              <FaCalendarAlt className="w-6 h-6" />
+              <input
+                type={isDateFocused ? "date" : "text"}
+                placeholder="Data e mbarimit"
+                value={
+                  isDateFocused
+                    ? expiredAt
+                    : expiredAt
+                    ? formatDisplayDate(expiredAt)
+                    : ""
+                }
+                onFocus={() => setIsDateFocused(true)}
+                onBlur={() => setIsDateFocused(false)}
+                onChange={(e) => setExpiredAt(e.target.value)}
+                className="grow"
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </label>
+            <button
+              onClick={() => {
+                const modal = document.getElementById(
+                  "my_modal_1"
+                ) as HTMLDialogElement | null;
+                if (modal) {
+                  modal.showModal();
+                }
+              }}
+              className="btn btn-primary btn-lg btn-wide"
+            >
+              Posto
+            </button>
+          </div>
           <dialog id="my_modal_1" className="modal">
             <div className="modal-box">
               <h3 className="font-bold text-lg">A jeni të sigurt?</h3>

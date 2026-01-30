@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
       company_displayName: company.displayName,
       thumbnail: jobData.thumbnail,
       city: jobData.city,
-      createdAt: new Date()
+      createdAt: new Date(),
+      expiredAt: new Date(jobData.expiredAt)
     });
 
     // 5. Update Company Billing Data
