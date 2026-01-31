@@ -13,27 +13,61 @@ interface Job {
   latlong: Array<string>;
   thumbnail: string;
   createdAt: string;
+  expiredAt?: string;
+  validUntil?: string;
   salary: string;
   _id: string;
 }
 
-function getTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
+function getJobDateInfo(job: Job): { text: string; isFresh: boolean } {
+  const createdDate = new Date(job.createdAt);
   const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  // Set times to midnight for accurate day difference
+  const createdMidnight = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate());
+  const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const diffInMs = nowMidnight.getTime() - createdMidnight.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  let interval = Math.floor(seconds / 31536000);
-  if (interval >= 1) return `${interval} vit${interval > 1 ? "e" : ""} më parë`;
-  interval = Math.floor(seconds / 2592000);
-  if (interval >= 1) return `${interval} muaj më parë`;
-  interval = Math.floor(seconds / 86400);
-  if (interval >= 1) return `${interval} ditë më parë`;
-  interval = Math.floor(seconds / 3600);
-  if (interval >= 1) return `${interval} orë më parë`;
-  interval = Math.floor(seconds / 60);
-  if (interval >= 1)
-    return `${interval} minut${interval > 1 ? "a" : "ë"} më parë`;
-  return "Tani";
+  if (diffInDays <= 3) {
+    let relativeText = "";
+    if (diffInDays === 0) {
+      relativeText = "Postuar sot";
+    } else if (diffInDays === 1) {
+      relativeText = "Postuar dje";
+    } else {
+      relativeText = `Para ${diffInDays} ditësh`;
+    }
+    return { text: relativeText, isFresh: true };
+  } else {
+    const expirationSource = job.expiredAt || job.validUntil;
+    let expDate: Date;
+    
+    if (expirationSource) {
+      expDate = new Date(expirationSource);
+    } else {
+      // Fallback: If no expiration date is provided in the document,
+      // default to 15 days from now to avoid showing a past date.
+      expDate = new Date();
+      expDate.setDate(expDate.getDate() + 15);
+    }
+
+    const day = expDate.getDate();
+    const monthIndex = expDate.getMonth();
+    const year = expDate.getFullYear();
+    const nowYear = new Date().getFullYear();
+
+    const albanianMonths = [
+      "janar", "shkurt", "mars", "prill", "maj", "qershor",
+      "korrik", "gusht", "shtator", "tetor", "nëntor", "dhjetor"
+    ];
+
+    const monthName = albanianMonths[monthIndex];
+    const yearSuffix = year !== nowYear ? ` ${year}` : "";
+
+    return { text: `Përfundon me ${day} ${monthName}${yearSuffix}`, isFresh: false };
+  }
 }
 
 interface JobsProps {
@@ -122,16 +156,21 @@ export default function Jobs({ Jobs: jobsProp }: JobsProps) {
               </h2>
             </div>
             <div className="mt-1 ml-0.5">
-              <h2
-                style={{ color: "rgb(107, 114, 128)" }}
-                className="font-montserrat flex items-center text-sm"
-              >
-                <FaRegClock
-                  className="mr-1 w-4 h-4"
-                  style={{ fill: "rgb(107, 114, 128)" }}
-                />
-                {getTimeAgo(job.createdAt)}
-              </h2>
+              {(() => {
+                const { text, isFresh } = getJobDateInfo(job);
+                return (
+                  <h2
+                    style={{ color: isFresh ? "rgb(107, 114, 128)" : "#64748b" }}
+                    className={`font-montserrat flex items-center text-sm ${!isFresh ? "font-medium" : ""}`}
+                  >
+                    <FaRegClock
+                      className="mr-1 w-4 h-4"
+                      style={{ fill: isFresh ? "rgb(107, 114, 128)" : "#64748b" }}
+                    />
+                    {text}
+                  </h2>
+                );
+              })()}
               <h2 className="font-montserrat flex items-center text-green-600 font-semibold">
                 {job.salary} €
               </h2>

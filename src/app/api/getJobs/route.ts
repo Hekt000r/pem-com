@@ -21,7 +21,8 @@ export async function GET() {
                 city: 1,
                 thumbnail: 1,
                 createdAt: 1,
-                salary: 1
+                salary: 1,
+                expiredAt: 1
                 // _id is included by default
             }
         }
