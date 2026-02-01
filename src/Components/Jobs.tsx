@@ -125,7 +125,7 @@ export default function Jobs({ Jobs: jobsProp }: JobsProps) {
   }
 
   return (
-    <div className="mt-8 bg-white m-4 flex flex-row flex-wrap">
+    <div className="mt-8 bg-white m-4 flex flex-row flex-wrap gap-4 justify-center md:justify-start">
       <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Roboto&display=swap"
         rel="stylesheet"
@@ -133,13 +133,13 @@ export default function Jobs({ Jobs: jobsProp }: JobsProps) {
       {jobs.map((job: Job) => (
         <div
           key={job._id}
-          className="shadow-2xl w-86 h-64 mt-4 bg-white rounded-xl flex flex-col justify-between mr-6 border-gray-300 border-[1px] p-6"
+          className="shadow-2xl w-86 h-64 bg-white rounded-xl flex flex-col justify-between border-gray-300 border-[1px] p-6"
         >
           <div>
             <div className="flex flex-row mb-2">
               <img
                 src={job.thumbnail}
-                className="max-h-18 max-w-18 rounded-2xl"
+                className="h-18 w-18 rounded-2xl object-contain"
                 alt=""
               />
               <div className="flex flex-col justify-start ml-4">
