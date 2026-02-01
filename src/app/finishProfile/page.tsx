@@ -8,12 +8,40 @@ import {
   FaCalendar,
   FaCircleInfo,
   FaDoorOpen,
+  FaUpload,
   FaWpforms,
   FaXmark,
 } from "react-icons/fa6";
 import axios from "axios";
 import { IoDocument, IoSparkles } from "react-icons/io5";
 import { ImCheckmark } from "react-icons/im";
+import { MdOutlineFileUpload } from "react-icons/md";
+import { PhoneInput, defaultCountries, parseCountry } from "react-international-phone";
+import "react-international-phone/style.css";
+
+const ALBANIAN_REGIONS = [
+  "al",
+  "xk",
+  "mk",
+  "me",
+  "gr", // Ballkani
+  "de",
+  "ch",
+  "it",
+  "at",
+  "gb",
+  "be",
+  "se", // Evropa
+  "us",
+  "ca", // Amerika
+];
+
+const filteredCountries = defaultCountries.filter((country) => {
+  const { iso2 } = parseCountry(country);
+  return ALBANIAN_REGIONS.includes(iso2);
+});
+
+const PREFERRED_COUNTRIES = ["al", "xk", "mk", "me", "rs", "gr"];
 
 export default function FinishProfile() {
   const { data: session, status } = useSession({
@@ -29,6 +57,7 @@ export default function FinishProfile() {
   const [surName, setSurName] = useState("");
   const [address, setAddress] = useState("");
   const [cv, setCV] = useState<File | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
 
   const [TOSAgreed, setTOSAgreed] = useState(false);
 
@@ -83,48 +112,100 @@ export default function FinishProfile() {
         <>
           <div className="h-screen w-screen flex justify-center items-center bg-linear-to-r from-blue-500 via-blue-600 to-blue-700 to-100%">
             <div className="bg-white rounded-lg shadow-2xl border-1 border-gray-700 max-w-204 flex">
-              <div className="h-132 w-86 bg-white rounded-lg  flex">
+              <div className="h-132 w-2xl bg-white rounded-lg  flex">
                 <div className="m-4 w-full">
                   <h1 className="text-2xl font-montserrat font-semibold w-full flex justify-center">
                     Mbaroje profilin
                   </h1>
-                  <div className="flex w-full flex-col items-center justify-start">
-                    <div className="mt-8">
-                      <h1 className="font-montserrat font-semibold text-gray-500 text-sm mb-1">
-                        Emri juaj
-                      </h1>
-                      <input
-                        type="text"
-                        placeholder="Emri"
-                        className="input w-72"
-                        onChange={(e) => setFirstName(e.target.value)}
-                      />
+                  <div className="flex items-center justify-center h-86">
+                    {/* Left Panel */}
+                    <div className="w-[40%] pl-8 pt-4 h-full">
+                      {/* Avatar Image */}
+                      <div className="flex items-center flex-col">
+                        <img
+                          className="w-24 h-24 rounded-full"
+                          src="default_avatar.png"
+                          alt=""
+                        />
+                        <button className="rounded-md btn btn-sm w-32 btn-outline border-gray-300 shadow-md mt-2">
+                          Ngarko foto
+                        </button>
+                      </div>
+
+                      {/* First name */}
+                      <div className="form-control w-full mt-4">
+                        <label className="label flex flex-col items-start">
+                          <span>Emri</span>
+                          <input type="text" className="input" name="" id="" />
+                        </label>
+                      </div>
+                      {/*------------*/}
+
+                      {/* Last name */}
+                      <div className="form-control w-full mt-4">
+                        <label className="label flex flex-col items-start">
+                          <span>Mbiemri</span>
+                          <input type="text" className="input" name="" id="" />
+                        </label>
+                      </div>
+                      {/*------------*/}
                     </div>
-                    <div className="mt-8">
-                      <h1 className="font-montserrat font-semibold text-gray-500 text-sm mb-1">
-                        Mbiemri juaj
-                      </h1>
-                      <input
-                        type="text"
-                        placeholder="Mbiemri"
-                        className="input w-72"
-                        onChange={(e) => setSurName(e.target.value)}
-                      />
+                    {/*---*/}
+
+                    {/* Right Panel */}
+                    <div className="w-[40%] pl-8 pt-4 h-full">
+                      {/* CV upload */}
+                      <div
+                        className="flex items-center flex-col border-2 border-dashed rounded-lg border-gray-300
+                      hover:bg-gray-200 cursor-pointer hover:border-sky-300 hover:shadow-xl
+                      "
+                      >
+                        <div className="h-33.5 p-8 flex flex-col items-center justify-center">
+                          <div className="bg-sky-200 p-2 h-fit w-fit rounded-full">
+                            <MdOutlineFileUpload className="w-8 h-8 fill-sky-700" />
+                          </div>
+                          <h1 className="font-montserrat font-semibold text-sm mt-2">
+                            Ngarko CV-në
+                          </h1>
+                          <p className="font-montserrat font-semibold text-xs text-gray-600 mt-1">
+                            PDF ose Word
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Phone Number */}
+                      <div className="form-control w-full mt-4">
+                        <label className="label flex flex-col items-start">
+                          <span>Numri i telefonit</span>
+                          <PhoneInput
+                            defaultCountry="al"
+                            value={phoneNumber}
+                            onChange={(phoneNumber) =>
+                              setPhoneNumber(phoneNumber)
+                            }
+                            countries={filteredCountries}
+                            preferredCountries={PREFERRED_COUNTRIES}
+                          />
+                        </label>
+                      </div>
+                      {/*------------*/}
+
+                      {/* Current Role */}
+                      <div className="form-control w-full mt-4">
+                        <label className="label flex flex-col items-start">
+                          <span>Puna aktuale</span>
+                          <input
+                            type="text"
+                            placeholder="p.sh: Professor, i papunë, student"
+                            className="input"
+                            name=""
+                            id=""
+                          />
+                        </label>
+                      </div>
+                      {/*------------*/}
                     </div>
-                  </div>
-                  <div className="flex w-full flex-col items-center justify-start">
-                    <div className="mt-8">
-                      <h1 className="font-montserrat font-semibold text-gray-500 text-sm mb-1">
-                        Përshkrimi (opsional)
-                      </h1>
-                      <textarea
-                        className="textarea w-72"
-                        placeholder="Unë jam ... kam studiar në ... kam punuar në .."
-                        onChange={(e) => {
-                          setInput(e.target.value);
-                        }}
-                      ></textarea>
-                    </div>
+                    {/*---*/}
                   </div>
 
                   <div className="h-0.5 bg-gray-200 mt-4 rounded-2xl"></div>
