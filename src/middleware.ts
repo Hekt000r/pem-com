@@ -9,7 +9,6 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
-
         // Public routes that don't require authentication
         const publicRoutes = [
           "/api/getJobs",
@@ -19,6 +18,12 @@ export default withAuth(
           "/api/searchJobs",
           "/api/registerCredentialsUser",
           "/api/companyVerifyMagicLink", 
+          "/api/registerCompany",
+          "/api/getJobByID",
+          "/api/getCompanyByJobID",
+          "/api/getJobs",
+          "/api/getJobsByCompanyID",
+          "/api/finishCompanyRegistration"
         ];
 
         // Check if the current path is in the public routes list
