@@ -214,21 +214,29 @@ export default function FinishProfile() {
                         {/*------------*/}
                       </div>
                       {/* CV upload */}
-                      <div
-                        className="flex items-center flex-col border-2 border-dashed rounded-lg border-gray-300
-                      hover:bg-gray-200 cursor-pointer hover:border-sky-300 hover:shadow-xl
-                      "
-                      >
-                        <div className="h-33.5 p-8 flex flex-col items-center justify-center">
-                          <div className="bg-sky-200 p-2 h-fit w-fit rounded-full">
-                            <MdOutlineFileUpload className="w-8 h-8 fill-sky-700" />
+                      <div className="relative group p-1 -m-1">
+                        <div
+                          className="flex items-center flex-col border-2 border-dashed rounded-xl border-gray-300 bg-gray-50/50 
+                          transition-all duration-300 ease-out hover:border-sky-500 hover:bg-sky-50 hover:shadow-[10_0_20px_rgba(14,165,233,0.1)] 
+                          cursor-pointer group-hover:-translate-y-1 active:scale-[0.98] w-full relative z-10"
+                        >
+                          <div className="h-36 p-6 flex flex-col items-center justify-center w-full relative z-10">
+                            <div className="bg-sky-100 p-3 h-fit w-fit rounded-2xl mb-3 transition-colors duration-300 group-hover:bg-sky-600">
+                              <MdOutlineFileUpload className="w-8 h-8 text-sky-600 transition-colors duration-300 group-hover:text-white" />
+                            </div>
+                            <h3 className="font-montserrat font-bold text-sm text-gray-800 transition-colors duration-300 group-hover:text-sky-700">
+                              Ngarko CV-në tuaj
+                            </h3>
+                            <p className="font-montserrat font-medium text-[11px] text-gray-500 mt-1 flex items-center">
+                              <IoDocument className="mr-1 w-3 h-3" /> PDF ose Word (Maks. 10MB)
+                            </p>
                           </div>
-                          <h1 className="font-montserrat font-semibold text-sm mt-2">
-                            Ngarko CV-në
-                          </h1>
-                          <p className="font-montserrat font-semibold text-xs text-gray-600 mt-1">
-                            PDF ose Word
-                          </p>
+                          
+                          {/* Animated border/glow effect on hover */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-sky-400 to-transparent"></div>
+                            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-sky-400 to-transparent"></div>
+                          </div>
                         </div>
                       </div>
                     </div>
