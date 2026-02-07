@@ -16,7 +16,11 @@ import axios from "axios";
 import { IoDocument, IoSparkles } from "react-icons/io5";
 import { ImCheckmark } from "react-icons/im";
 import { MdOutlineFileUpload } from "react-icons/md";
-import { PhoneInput, defaultCountries, parseCountry } from "react-international-phone";
+import {
+  PhoneInput,
+  defaultCountries,
+  parseCountry,
+} from "react-international-phone";
 import "react-international-phone/style.css";
 
 const ALBANIAN_REGIONS = [
@@ -111,49 +115,104 @@ export default function FinishProfile() {
       {status === "authenticated" ? (
         <>
           <div className="h-screen w-screen flex justify-center items-center bg-linear-to-r from-blue-500 via-blue-600 to-blue-700 to-100%">
-            <div className="bg-white rounded-lg shadow-2xl border-1 border-gray-700 max-w-204 flex">
-              <div className="h-132 w-2xl bg-white rounded-lg  flex">
+            <div className="bg-white rounded-lg max-h-168 shadow-2xl border-1 border-gray-700 max-w-204 flex">
+              <div className="w-2xl bg-white rounded-lg  flex">
                 <div className="m-4 w-full">
                   <h1 className="text-2xl font-montserrat font-semibold w-full flex justify-center">
                     Mbaroje profilin
                   </h1>
-                  <div className="flex items-center justify-center h-86">
-                    {/* Left Panel */}
-                    <div className="w-[40%] pl-8 pt-4 h-full">
-                      {/* Avatar Image */}
-                      <div className="flex items-center flex-col">
-                        <img
-                          className="w-24 h-24 rounded-full"
-                          src="default_avatar.png"
-                          alt=""
-                        />
-                        <button className="rounded-md btn btn-sm w-32 btn-outline border-gray-300 shadow-md mt-2">
-                          Ngarko foto
-                        </button>
-                      </div>
+                  <div className="flex flex-col items-center justify-center max-h-140">
+                    {/* Top Panel */}
+                    <div className="w-full flex flex-col pt-4 h-full">
+                      <div className="flex w-full space-x-8 items-center justify-center">
+                        {/* Avatar Image */}
+                        <div className="flex items-center flex-col">
+                          <img
+                            className="w-24 h-24 rounded-full"
+                            src="default_avatar.png"
+                            alt=""
+                          />
+                          <button className="rounded-md btn w-40 btn-outline flex items-center justify-center border-gray-300 shadow-md mt-2">
+                            <MdOutlineFileUpload className="w-6 h-6" /> Ngarko
+                            foto
+                          </button>
+                        </div>
 
-                      {/* First name */}
-                      <div className="form-control w-full mt-4">
-                        <label className="label flex flex-col items-start">
-                          <span>Emri</span>
-                          <input type="text" className="input" name="" id="" />
-                        </label>
-                      </div>
-                      {/*------------*/}
+                        <div className="w-64">
+                          {/* First name */}
+                          <div className="form-control w-full ">
+                            <label className="label flex flex-col items-start">
+                              <span className="text-gray-700 font-montserrat font-semibold">
+                                Emri
+                              </span>
+                              <input
+                                type="text"
+                                className="input"
+                                placeholder="Emri"
+                                name=""
+                                id=""
+                              />
+                            </label>
+                          </div>
+                          {/*------------*/}
 
-                      {/* Last name */}
-                      <div className="form-control w-full mt-4">
-                        <label className="label flex flex-col items-start">
-                          <span>Mbiemri</span>
-                          <input type="text" className="input" name="" id="" />
-                        </label>
+                          {/* Last name */}
+                          <div className="form-control w-full mt-2">
+                            <label className="label flex flex-col items-start">
+                              <span className="text-gray-700 font-montserrat font-semibold">
+                                Mbiemri
+                              </span>
+                              <input
+                                placeholder="Mbiemri"
+                                type="text"
+                                className="input"
+                                name=""
+                                id=""
+                              />
+                            </label>
+                          </div>
+                          {/*------------*/}
+                        </div>
                       </div>
-                      {/*------------*/}
                     </div>
                     {/*---*/}
 
-                    {/* Right Panel */}
-                    <div className="w-[40%] pl-8 pt-4 h-full">
+                    {/* Bottom Panel */}
+                    <div className="w-full pt-4 h-full flex justfiy-center flex-col space-y-4">
+                      <div className="flex items-center justify-center w-full space-x-8">
+                        {/* Phone Number */}
+                        <div className="form-control max-w-96 mt-4">
+                          <label className="label flex flex-col items-start">
+                            <span className="text-gray-700 font-montserrat font-semibold">Numri i telefonit</span>
+                            <PhoneInput
+                              defaultCountry="al"
+                              value={phoneNumber}
+                              onChange={(phoneNumber) =>
+                                setPhoneNumber(phoneNumber)
+                              }
+                              countries={filteredCountries}
+                              preferredCountries={PREFERRED_COUNTRIES}
+                            />
+                            
+                          </label>
+                        </div>
+                        {/*------------*/}
+
+                        {/* Current Role */}
+                        <div className="form-control w-64 mt-4">
+                          <label className="label flex flex-col items-start">
+                            <span className="text-gray-700 font-montserrat font-semibold">Puna aktuale</span>
+                            <input
+                              type="text"
+                              placeholder="p.sh: Professor, i papunë, student"
+                              className="input"
+                              name=""
+                              id=""
+                            />
+                          </label>
+                        </div>
+                        {/*------------*/}
+                      </div>
                       {/* CV upload */}
                       <div
                         className="flex items-center flex-col border-2 border-dashed rounded-lg border-gray-300
@@ -172,38 +231,6 @@ export default function FinishProfile() {
                           </p>
                         </div>
                       </div>
-
-                      {/* Phone Number */}
-                      <div className="form-control w-full mt-4">
-                        <label className="label flex flex-col items-start">
-                          <span>Numri i telefonit</span>
-                          <PhoneInput
-                            defaultCountry="al"
-                            value={phoneNumber}
-                            onChange={(phoneNumber) =>
-                              setPhoneNumber(phoneNumber)
-                            }
-                            countries={filteredCountries}
-                            preferredCountries={PREFERRED_COUNTRIES}
-                          />
-                        </label>
-                      </div>
-                      {/*------------*/}
-
-                      {/* Current Role */}
-                      <div className="form-control w-full mt-4">
-                        <label className="label flex flex-col items-start">
-                          <span>Puna aktuale</span>
-                          <input
-                            type="text"
-                            placeholder="p.sh: Professor, i papunë, student"
-                            className="input"
-                            name=""
-                            id=""
-                          />
-                        </label>
-                      </div>
-                      {/*------------*/}
                     </div>
                     {/*---*/}
                   </div>
