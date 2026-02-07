@@ -228,7 +228,7 @@ export default function FinishProfile() {
                               Ngarko CV-në tuaj
                             </h3>
                             <p className="font-montserrat font-medium text-[11px] text-gray-500 mt-1 flex items-center">
-                              <IoDocument className="mr-1 w-3 h-3" /> PDF ose Word (Maks. 10MB)
+                              <IoDocument className="mr-1 w-3 h-3" /> PDF ose Word (Maks. 2MB)
                             </p>
                           </div>
                           
