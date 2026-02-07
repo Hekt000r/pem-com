@@ -218,9 +218,9 @@ export default function FinishProfile() {
                         <div
                           className="flex items-center flex-col border-2 border-dashed rounded-xl border-gray-300 bg-gray-50/50 
                           transition-all duration-300 ease-out hover:border-sky-500 hover:bg-sky-50 hover:shadow-[10_0_20px_rgba(14,165,233,0.1)] 
-                          cursor-pointer group-hover:-translate-y-1 active:scale-[0.98] w-full relative z-10"
+                          cursor-pointer group-hover:-translate-y-1 active:scale-[0.98] w-full relative"
                         >
-                          <div className="h-36 p-6 flex flex-col items-center justify-center w-full relative z-10">
+                          <div className="h-36 p-6 flex flex-col items-center justify-center w-full relative">
                             <div className="bg-sky-100 p-3 h-fit w-fit rounded-2xl mb-3 transition-colors duration-300 group-hover:bg-sky-600">
                               <MdOutlineFileUpload className="w-8 h-8 text-sky-600 transition-colors duration-300 group-hover:text-white" />
                             </div>
