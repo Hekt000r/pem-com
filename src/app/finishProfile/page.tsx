@@ -16,33 +16,14 @@ import axios from "axios";
 import { IoDocument, IoSparkles } from "react-icons/io5";
 import { ImCheckmark } from "react-icons/im";
 import { MdOutlineFileUpload } from "react-icons/md";
-import {
-  PhoneInput,
-  defaultCountries,
-  parseCountry,
-} from "react-international-phone";
-import "react-international-phone/style.css";
+import dynamic from "next/dynamic";
 
-const ALBANIAN_REGIONS = [
-  "al",
-  "xk",
-  "mk",
-  "me",
-  "gr", // Ballkani
-  "de",
-  "ch",
-  "it",
-  "at",
-  "gb",
-  "be",
-  "se", // Evropa
-  "us",
-  "ca", // Amerika
-];
+import "intl-tel-input/styles";
+import "./page.css";
 
-const filteredCountries = defaultCountries.filter((country) => {
-  const { iso2 } = parseCountry(country);
-  return ALBANIAN_REGIONS.includes(iso2);
+// stupid wizard code to prevent NextJS from SSR'ing the phone input
+const IntlTelInput = dynamic(() => import("intl-tel-input/react"), {
+  ssr: false,
 });
 
 const PREFERRED_COUNTRIES = ["al", "xk", "mk", "me", "rs", "gr"];
@@ -62,6 +43,7 @@ export default function FinishProfile() {
   const [address, setAddress] = useState("");
   const [cv, setCV] = useState<File | null>(null);
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
+  const [isValidNumber, setIsValidNumber] = useState<boolean | undefined>();
 
   const [TOSAgreed, setTOSAgreed] = useState(false);
 
@@ -183,17 +165,53 @@ export default function FinishProfile() {
                         {/* Phone Number */}
                         <div className="form-control max-w-96 mt-4">
                           <label className="label flex flex-col items-start">
-                            <span className="text-gray-700 font-montserrat font-semibold">Numri i telefonit</span>
-                            <PhoneInput
-                              defaultCountry="al"
-                              value={phoneNumber}
-                              onChange={(phoneNumber) =>
-                                setPhoneNumber(phoneNumber)
-                              }
-                              countries={filteredCountries}
-                              preferredCountries={PREFERRED_COUNTRIES}
-                            />
-                            
+                            <span className="text-gray-700 font-montserrat font-semibold">
+                              Numri i telefonit
+                            </span>
+                            <div className="phone-container">
+                              <IntlTelInput
+                                onChangeNumber={setPhoneNumber}
+                                onChangeValidity={setIsValidNumber}
+                                initOptions={{
+                                  autoPlaceholder: "polite",
+                                  separateDialCode: false,
+                                  allowedNumberTypes: [
+                                    "MOBILE",
+                                    "PERSONAL_NUMBER",
+                                  ],
+                                  countryNameLocale: "sq",
+                                  countryOrder: [
+                                    "al",
+                                    "xk",
+                                    "mk",
+                                    "me",
+                                    "rs",
+                                    "gr",
+                                  ],
+                                  initialCountry: "al",
+                                  onlyCountries: [
+                                    "al",
+                                    "xk",
+                                    "mk",
+                                    "me",
+                                    "gr",
+                                    "de",
+                                    "ch",
+                                    "it",
+                                    "at",
+                                    "gb",
+                                    "be",
+                                    "se",
+                                    "us",
+                                    "ca",
+                                  ],
+                                  loadUtils: () =>
+                                    import(
+                                      "intl-tel-input/build/js/utils.js" as any
+                                    ) as any,
+                                }}
+                              />
+                            </div>
                           </label>
                         </div>
                         {/*------------*/}
@@ -201,7 +219,9 @@ export default function FinishProfile() {
                         {/* Current Role */}
                         <div className="form-control w-64 mt-4">
                           <label className="label flex flex-col items-start">
-                            <span className="text-gray-700 font-montserrat font-semibold">Puna aktuale</span>
+                            <span className="text-gray-700 font-montserrat font-semibold">
+                              Puna aktuale
+                            </span>
                             <input
                               type="text"
                               placeholder="p.sh: Professor, i papunë, student"
@@ -228,10 +248,11 @@ export default function FinishProfile() {
                               Ngarko CV-në tuaj
                             </h3>
                             <p className="font-montserrat font-medium text-[11px] text-gray-500 mt-1 flex items-center">
-                              <IoDocument className="mr-1 w-3 h-3" /> PDF ose Word (Maks. 2MB)
+                              <IoDocument className="mr-1 w-3 h-3" /> PDF ose
+                              Word (Maks. 2MB)
                             </p>
                           </div>
-                          
+
                           {/* Animated border/glow effect on hover */}
                           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                             <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-sky-400 to-transparent"></div>
