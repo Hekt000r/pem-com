@@ -295,9 +295,8 @@ export default function FinishProfile() {
 
                     <div className="flex space-x-4">
                       <button
-                        disabled={!TOSAgreed}
                         onClick={handleManualSubmit}
-                        className="btn btn-primary mt-2"
+                        className="btn btn-primary rounded-md mt-2"
                       >
                         <ImCheckmark className="w-6 h-6" /> Përfundo
                       </button>
@@ -307,7 +306,7 @@ export default function FinishProfile() {
                             window.location.pathname = "/";
                           });
                         }}
-                        className="btn btn-error mt-2"
+                        className="btn rounded-md hover:bg-red-200 mt-2"
                       >
                         <FaXmark className="w-7 h-7" /> Anulo dhe dil
                       </button>
