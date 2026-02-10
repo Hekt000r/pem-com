@@ -69,7 +69,15 @@ export async function GET(req: NextRequest) {
   const messages = await ChatDB.collection("Messages")
     .find(
       { conversationId: convoObjectId },
-      { projection: { content: 1, senderId: 1, timestamp: 1 } }
+      {
+        projection: {
+          content: 1,
+          senderId: 1,
+          timestamp: 1,
+          attachments: 1,
+          attachment: 1,
+        },
+      }
     )
     .sort({ timestamp: 1 })
     .limit(limit)

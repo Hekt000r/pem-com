@@ -5,7 +5,7 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { FaRegSmile, FaSearch } from "react-icons/fa";
-import { FaLink, FaPlus } from "react-icons/fa6";
+import { FaLink, FaPlus, FaFilePdf, FaDownload } from "react-icons/fa6";
 import Pusher from "pusher-js";
 import Linkify from "linkify-react";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
@@ -15,6 +15,14 @@ const linkifyOptions = {
   target: "_blank",
   rel: "noopener noreferrer",
   className: "underline",
+};
+
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 export default function AdminChats() {
@@ -32,11 +40,14 @@ export default function AdminChats() {
   /* Form Data */
   const [enteredMessage, setEnteredMessage] = useState<any>("");
   const [active, setActive] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileUrls, setFileUrls] = useState<Record<string, string>>({});
 
   /* Refs */
 
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const pusherRef = useRef<Pusher | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { company, billingData } = useCompany();
   const { data: session, status } = useSession();
@@ -143,6 +154,60 @@ export default function AdminChats() {
     setEnteredMessage((prev: any) => prev + emojiData.emoji);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const getFileUrl = async (filePath: string) => {
+    if (fileUrls[filePath]) return fileUrls[filePath];
+    try {
+      const res = await axios.get("/api/getPrivateFile", {
+        params: {
+          userType: "company",
+          convoID: activeConversation,
+          companyID: company?._id,
+          filePath: filePath,
+        },
+      });
+      const url = res.data.url;
+      setFileUrls((prev) => ({ ...prev, [filePath]: url }));
+      return url;
+    } catch (err) {
+      console.error("Error fetching private file:", err);
+      return null;
+    }
+  };
+
+  const handleFileClick = async (filePath: string) => {
+    const url = await getFileUrl(filePath);
+    if (url) window.open(url, "_blank");
+  };
+
+  // Pre-fetch URLs for all attachments in messages
+  useEffect(() => {
+    if (!messages.length || !activeConversation) return;
+
+    messages.forEach((msg: any) => {
+      // Check new attachments array
+      msg.attachments?.forEach((att: any) => {
+        if (att.path && !fileUrls[att.path]) {
+          getFileUrl(att.path);
+        }
+      });
+      // Check legacy attachment field
+      if (msg.attachment?.path && !fileUrls[msg.attachment.path]) {
+        getFileUrl(msg.attachment.path);
+      }
+    });
+  }, [messages, activeConversation, company?._id]);
+
   return (
     <div>
       <div className="h-[calc(85vh)] flex">
@@ -223,6 +288,132 @@ export default function AdminChats() {
                     <Linkify options={linkifyOptions}>
                       {message.content}
                     </Linkify>
+                    {/* Support for new 'attachments' array */}
+                    {message?.attachments?.map((att: any, idx: number) => {
+                      return att.type?.startsWith("image/") ? (
+                        <div 
+                          key={idx}
+                          className={`mt-3 overflow-hidden rounded-xl border cursor-pointer hover:opacity-95 transition-all duration-200 ${
+                            isCurrent ? "border-white/20" : "border-black/10"
+                          }`}
+                          onClick={() => handleFileClick(att.path)}
+                        >
+                          <img 
+                            src={fileUrls[att.path] || "/image-placeholder.png"} 
+                            alt={att.name}
+                            className={`w-full h-auto max-h-64 object-cover block ${!fileUrls[att.path] ? "animate-pulse bg-gray-300" : ""}`}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          key={idx}
+                          className={`mt-3 p-3 rounded-xl border flex items-center gap-3 transition-all duration-200 group cursor-pointer ${
+                            isCurrent
+                              ? "bg-white/10 border-white/20 hover:bg-white/20 text-white"
+                              : "bg-black/5 border-black/10 hover:bg-black/10 text-black"
+                          }`}
+                          onClick={() => handleFileClick(att.path || att.url)}
+                        >
+                          <div
+                            className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm shrink-0 ${
+                              isCurrent ? "bg-white/20 text-white" : "bg-red-500/10 text-red-600"
+                            }`}
+                          >
+                            <FaFilePdf size={20} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold truncate leading-tight">
+                              {att.name}
+                            </div>
+                            <div
+                              className={`text-[11px] mt-0.5 font-medium uppercase tracking-wider ${
+                                isCurrent ? "text-blue-100/80" : "text-gray-500"
+                              }`}
+                            >
+                              {att.type?.split("/")[1]?.toUpperCase() || "FILE"} •{" "}
+                              {formatFileSize(att.size || 0)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFileClick(att.path || att.url);
+                            }}
+                            className={`p-2 rounded-full transition-colors shrink-0 ${
+                              isCurrent
+                                ? "hover:bg-white/20 text-white"
+                                : "hover:bg-black/10 text-gray-700"
+                            }`}
+                          >
+                            <FaDownload size={16} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                    
+                    {/* Fallback for legacy single 'attachment' */}
+                    {message?.attachment && !message?.attachments?.length && (
+                      (() => {
+                        const att = message.attachment;
+                        return att.type?.startsWith("image/") ? (
+                          <div 
+                            className={`mt-3 overflow-hidden rounded-xl border cursor-pointer hover:opacity-95 transition-all duration-200 ${
+                              isCurrent ? "border-white/20" : "border-black/10"
+                            }`}
+                            onClick={() => handleFileClick(att.path || "")}
+                          >
+                            <img 
+                              src={fileUrls[att.path || ""] || "/image-placeholder.png"} 
+                              alt={att.name}
+                              className={`w-full h-auto max-h-64 object-cover block ${att.path && !fileUrls[att.path] ? "animate-pulse bg-gray-300" : ""}`}
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className={`mt-3 p-3 rounded-xl border flex items-center gap-3 transition-all duration-200 group cursor-pointer ${
+                              isCurrent
+                                ? "bg-white/10 border-white/20 hover:bg-white/20 text-white"
+                                : "bg-black/5 border-black/10 hover:bg-black/10 text-black"
+                            }`}
+                            onClick={() => handleFileClick(att.path || att.url || "")}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm shrink-0 ${
+                                isCurrent ? "bg-white/20 text-white" : "bg-red-500/10 text-red-600"
+                              }`}
+                            >
+                              <FaFilePdf size={20} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-semibold truncate leading-tight">
+                                {att.name}
+                              </div>
+                              <div
+                                className={`text-[11px] mt-0.5 font-medium uppercase tracking-wider ${
+                                  isCurrent ? "text-blue-100/80" : "text-gray-500"
+                                }`}
+                              >
+                                {att.type?.split("/")[1]?.toUpperCase() || "FILE"} •{" "}
+                                {formatFileSize(att.size || 0)}
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleFileClick(att.path || att.url || "");
+                              }}
+                              className={`p-2 rounded-full transition-colors shrink-0 ${
+                                isCurrent
+                                  ? "hover:bg-white/20 text-white"
+                                  : "hover:bg-black/10 text-gray-700"
+                              }`}
+                            >
+                              <FaDownload size={16} />
+                            </button>
+                          </div>
+                        );
+                      })()
+                    )}
                     <div
                       className={`text-[10px] mt-1 text-right ${
                         isCurrent ? "text-white" : "text-gray-500"
@@ -250,18 +441,48 @@ export default function AdminChats() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  if (!activeConversation || !enteredMessage.trim()) return;
+                  if (!activeConversation || (!enteredMessage.trim() && !selectedFile)) return;
+
+                  const formData = new FormData();
+                  formData.append("companyID", company?._id?.toString() || "")
+                  formData.append("channel", activeConversation)
+                  formData.append("message", enteredMessage)
+                  if (selectedFile) {
+                    formData.append("attachment", selectedFile);
+                  }
+
                   axios.post(
-                    `/api/companySendMessage/`, {
-                      companyID: company?._id,
-                      channel: activeConversation,
-                      message: enteredMessage
+                    `/api/companySendMessage/`, formData, {
+                      headers: {"Content-Type": "multipart/form-data"}
                     }
                   )
                   setEnteredMessage("");
+                  removeSelectedFile();
                 }
               }}
             />
+
+            {selectedFile && (
+              <div className="absolute bottom-20 left-4 bg-gray-100 border border-gray-300 rounded-lg p-2 flex items-center gap-2 shadow-md z-10">
+                <div className="bg-blue-500 text-white p-1.5 rounded-md">
+                  <FaFilePdf size={14} />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold truncate max-w-[150px]">
+                    {selectedFile.name}
+                  </span>
+                  <span className="text-[10px] text-gray-500 italic">
+                    {formatFileSize(selectedFile.size)}
+                  </span>
+                </div>
+                <button 
+                  onClick={removeSelectedFile}
+                  className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <FaPlus className="rotate-45 size-4" />
+                </button>
+              </div>
+            )}
             <button
               onClick={() => setActive(!active)}
               className="btn btn-ghost px-2"
@@ -286,21 +507,39 @@ export default function AdminChats() {
               </div>
             )}
 
-            <button className="btn btn-ghost px-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept=".pdf,.doc,.docx,image/*"
+            />
+            <button 
+              className={`btn btn-ghost px-2 ${selectedFile ? 'text-blue-500' : ''}`}
+              onClick={() => fileInputRef.current?.click()}
+            >
               <FaLink className="w-5 h-5" />
             </button>
             <button
               className="btn btn-success ml-2"
               onClick={() => {
-                if (!activeConversation || !enteredMessage.trim()) return;
-                  axios.post(
-                    `/api/companySendMessage/`, {
-                      companyID: company?._id,
-                      channel: activeConversation,
-                      message: enteredMessage
-                    }
-                  )
+                if (!activeConversation || (!enteredMessage.trim() && !selectedFile)) return;
+                
+                const formData = new FormData();
+                formData.append("companyID", company?._id?.toString() || "")
+                formData.append("channel", activeConversation)
+                formData.append("message", enteredMessage)
+                if (selectedFile) {
+                  formData.append("attachment", selectedFile);
+                }
+
+                axios.post(
+                  `/api/companySendMessage/`, formData, {
+                    headers: {"Content-Type": "multipart/form-data"}
+                  }
+                )
                 setEnteredMessage("");
+                removeSelectedFile();
               }}
             >
               <LuSend className="w-6 h-6 stroke-white" />
