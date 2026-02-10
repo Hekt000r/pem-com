@@ -1,30 +1,43 @@
 import { connectToDatabase } from "@/utils/mongodb";
+import { UploadPublicImage } from "@/utils/supabase/uploadPublicImage";
 import { ObjectId } from "mongodb";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const body: Company = await req.json();
+    const formData = await req.formData()
 
-    if (
-      !body ||
-      !body.name || 
-      !body.industry || 
-      !body.description || 
-      !body.representative || 
-      !body.representative.email || 
-      !body.representative.repName
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields: name, industry, description, and representative details are mandatory." },
-        { status: 400 }
-      );
+    const repRaw = formData.get("representative") as string
+    const representative = JSON.parse(repRaw)
+
+    const body = {
+      _id: new ObjectId(),
+      imageFile: formData.get("imageFile") as File,
+      name: formData.get("name"),
+      industry: formData.get("industry"),
+      description: formData.get("description"),
+      site: formData.get("site"),
+      location: formData.get("location"),
+      representative
     }
 
     const { db: UsersDB } = await connectToDatabase("Users");
     const companiesCollection = UsersDB.collection("Companies");
     const magicLinksCollection = UsersDB.collection("VerificationTokens");
+
+    // Upload company image to Supabase
+    let ImageURL = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
+
+    if (body.imageFile) {
+      const storagePath = `logos/${body._id}`
+
+      const supabaseUrl = await UploadPublicImage(
+        body.imageFile,storagePath,body.imageFile.type || "image/png"
+      )
+
+      ImageURL = supabaseUrl
+    }
 
     // 3. Prepare Company Document
     const companyDocument = {
@@ -33,7 +46,7 @@ export async function POST(req: NextRequest) {
       description: body.description,
       site: body.site,
       location: body.location,
-      imgURL: body.imgURL,
+      imgURL: ImageURL,
       representative: body.representative,
       status: "AWAITING_VERIFICATION",
       lifecycle: {

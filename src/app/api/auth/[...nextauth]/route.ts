@@ -3,6 +3,7 @@ import NextAuth, { AuthOptions, User } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { UploadPublicImage } from "@/utils/supabase/uploadPublicImage";
 
 /* Types */
 interface Account {
@@ -18,7 +19,11 @@ export const authOptions: AuthOptions = {
     Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text", placeholder: "email@example.com" },
+        email: {
+          label: "Email",
+          type: "text",
+          placeholder: "email@example.com",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -27,13 +32,18 @@ export const authOptions: AuthOptions = {
 
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await EndusersCollection.findOne({ email: credentials.email });
+        const user = await EndusersCollection.findOne({
+          email: credentials.email,
+        });
 
         if (!user) throw new Error("Fjalëkalimi ose email-i është i gabuar"); // Password or email is wrong
 
         if (!user.password) return null; // User registered via OAuth, no password
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
         if (!isValid) throw new Error("Fjalëkalimi ose email-i është i gabuar"); // Incorrect password
 
         return {
@@ -52,25 +62,50 @@ export const authOptions: AuthOptions = {
       const { db } = await connectToDatabase("Users");
       const EndusersCollection = db.collection("Endusers");
 
-      const existingUser = await EndusersCollection.findOne({ email: user.email });
+      const existingUser = await EndusersCollection.findOne({
+        email: user.email,
+      });
 
       if (!existingUser && account) {
         // Insert new OAuth user
+
+        // Uploading the user's avatar to Supabase S3
+        let ImageURL = user.image;
+        if (user.image) {
+          try {
+            const response = await fetch(user.image);
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            const storagePath = `avatars/${account.providerAccountId}`; // providerAccountId is equiavalent to OAuthID in DB.
+
+            const supabaseUrl = await UploadPublicImage(
+              buffer,
+              storagePath,
+              response.headers.get("content-type") || "image/png",
+            );
+
+            ImageURL = supabaseUrl;
+          } catch (error) {
+            console.error("Failed to upload google avatar to Supabase");
+          }
+        }
+
         await EndusersCollection.insertOne({
           oauthId: account.providerAccountId,
           email: user.email,
           name: user.name,
-          image: user.image,
+          image: ImageURL,
           hasProfile: false,
         });
       } else if (existingUser && account && !existingUser.oauthId) {
         // Update existing credentials user with oauthId
         await EndusersCollection.updateOne(
           { email: user.email },
-          { $set: { oauthId: account.providerAccountId } }
+          { $set: { oauthId: account.providerAccountId } },
         );
       }
-      
+
       return true;
     },
 
@@ -86,7 +121,7 @@ export const authOptions: AuthOptions = {
         // OAuth login or subsequent sessions: fetch user from DB to ensure fresh data
         const { db } = await connectToDatabase("Users");
         const EndusersCollection = db.collection("Endusers");
-        
+
         const dbUser = await EndusersCollection.findOne({ email: token.email });
         if (dbUser) {
           token.id = dbUser._id.toString();

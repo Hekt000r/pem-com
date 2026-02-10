@@ -55,6 +55,7 @@ declare global {
     lifecycle: CompanyLifecycle
     representative?: CompanyRepresentative;
     location: string;
+    imageFile: File;
   }
 
   export interface BillingPlanInfo {
@@ -130,12 +131,21 @@ declare global {
     { firstName: string; surname: string }
   >;
 
+  export interface Attachment {
+    name: string;
+    type: string;
+    size: number;
+    url?: string;
+    path?: string;
+  }
+
   export interface Message {
     _id: string;
     content: string;
     conversationId: string;
     senderId: string;
-    timestap: Date;
+    timestamp: Date;
+    attachments: Attachment[];
   }
 
   export interface CustomDecodedToken {
