@@ -6,6 +6,7 @@ import {
   FaCheckCircle,
   FaCheckSquare,
   FaMapMarkerAlt,
+  FaUpload,
   FaUserCircle,
   FaWindowClose,
 } from "react-icons/fa";
@@ -39,6 +40,7 @@ export default function RegisterCompany() {
   const [email, setEmail] = useState("");
   const [TOSAgreed, setTOSAgreed] = useState(false);
   const [tempImage, setTempImage] = useState("");
+  const [imageFile, setImageFile] = useState<File>()
 
   const [currentStep, setCurrentStep] = useState(1); // 1-3 (4,5 aswell, those are for information. success / failure)
 
@@ -116,18 +118,21 @@ export default function RegisterCompany() {
   };
 
   const handleFinalSubmit = async () => {
-    const body = {
-      name,
-      industry,
-      description,
-      site,
-      location,
-      image,
-      representative: { position, email, repName },
-    };
+    const formData = new FormData();
+    formData.append("name",name)
+    formData.append("industry", industry)
+    formData.append("description", description)
+    formData.append("site", site)
+    formData.append("location", location)
+    formData.append("imageFile", imageFile || "")
+    formData.append("representative", JSON.stringify({
+      position: position, email: email, repName: repName
+    }))
 
     try {
-      const response = await axios.post(`/api/registerCompany`, body);
+      const response = await axios.post(`/api/registerCompany`, formData, {
+        headers: {"Content-Type": "multipart/form-data"}
+      });
       setCurrentStep(4);
     } catch (error: any) {
       setError(error.message);
@@ -237,16 +242,17 @@ export default function RegisterCompany() {
             <div className="modal-box">
               <h3 className="font-bold text-lg">Ndrysho Logon</h3>
 
-              <div className="mt-2">
-                <input
-                  type="text"
-                  placeholder="URL e logos"
-                  className="input input-bordered w-full"
-                  value={tempImage}
-                  onChange={(e) => {
-                    setTempImage(e.target.value);
-                  }}
-                />
+              <div className="mt-4 flex flex-col items-center gap-4">
+                {tempImage && (
+                  <img
+                    src={tempImage}
+                    alt="Preview"
+                    className="w-48 h-48 object-contain border border-gray-400 rounded-md shadow-sm"
+                  />
+                )}
+                <p className="text-sm text-gray-500 font-legacy-montserrat">
+                  Parapamja e logos
+                </p>
               </div>
 
               <div className="modal-action">
@@ -257,14 +263,6 @@ export default function RegisterCompany() {
                     <FaWindowClose className="w-6 h-6" /> Mbyll
                   </button>
                 </form>
-                <button
-                  onClick={handleImageSubmit}
-                  className="btn btn-primary rounded-sm"
-                >
-                  {" "}
-                  <FaCheckSquare className="w-6 h-6" />
-                  Ruaj
-                </button>
               </div>
             </div>
           </dialog>
@@ -598,6 +596,32 @@ export default function RegisterCompany() {
                       </p>
                     </div>
                   </div>
+                </div>
+
+                <div className="flex flex-col items-center">
+                  <label className="btn btn-outline btn-primary btn-sm rounded-sm flex items-center gap-2">
+                    <FaUpload className="w-4 h-4" />
+                    Ndrysho foton
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setImageFile(file)
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setImage(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  <p className="text-[10px] text-gray-500 mt-1 font-legacy-montserrat">
+                    Maksimumi 5 MB
+                  </p>
                 </div>
                 <div className="border-gray-400 border w-xl rounded-md p-2 h-18 flex space-x-2">
                   <img

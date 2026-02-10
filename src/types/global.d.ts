@@ -55,6 +55,7 @@ declare global {
     lifecycle: CompanyLifecycle
     representative?: CompanyRepresentative;
     location: string;
+    imageFile: File;
   }
 
   export interface BillingPlanInfo {
