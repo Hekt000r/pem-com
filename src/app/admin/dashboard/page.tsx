@@ -47,7 +47,6 @@ export default function Page() {
 
         {/* Main Content Wrapper - Aligned in a column */}
         <div className="flex flex-col items-center gap-8">
-          
           {/* Top Row: Plan and Admins */}
           <div className="flex flex-wrap justify-center gap-8">
             {/* Plan Overview Card */}
@@ -91,7 +90,8 @@ export default function Page() {
                     </div>
                     <div className="flex flex-col">
                       <h1 className="text-md font-montserrat font-medium">
-                        Mesazhet këtë muaj ({billingData?.CompanyBillingInfo.messages}/
+                        Mesazhet këtë muaj (
+                        {billingData?.CompanyBillingInfo.messages}/
                         {billingData?.BillingPlanInfo.maxMessages})
                       </h1>
                       <progress
@@ -102,7 +102,9 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <div className="btn btn-primary">Ndrysho planin</div>
+                  <div className="btn btn-primary rounded-md">
+                    Ndrysho planin
+                  </div>
 
                   <div className="flex">
                     <div className="w-10 mr-2 flex items-center justify-center bg-gray-300 rounded-lg h-10">
@@ -110,7 +112,8 @@ export default function Page() {
                     </div>
                     <div className="flex flex-col">
                       <h1 className="text-md font-montserrat font-medium">
-                        Postimet këtë muaj ({billingData?.CompanyBillingInfo.posts}/
+                        Postimet këtë muaj (
+                        {billingData?.CompanyBillingInfo.posts}/
                         {billingData?.BillingPlanInfo.maxPosts})
                       </h1>
                       <progress
@@ -127,8 +130,8 @@ export default function Page() {
                     </div>
                     <div className="flex flex-col">
                       <h1 className="text-md font-montserrat font-medium">
-                        Reklama këtë muaj ({billingData?.CompanyBillingInfo.ads}/
-                        {billingData?.BillingPlanInfo.maxAds})
+                        Reklama këtë muaj ({billingData?.CompanyBillingInfo.ads}
+                        /{billingData?.BillingPlanInfo.maxAds})
                       </h1>
                       <progress
                         value={billingData?.CompanyBillingInfo.ads}
@@ -150,7 +153,7 @@ export default function Page() {
                   </h1>
                   <button
                     onClick={() => setAdminPopupActive(!adminPopupActive)}
-                    className="btn btn-primary"
+                    className="btn btn-primary rounded-md"
                   >
                     <FaPlusSquare className="w-6 h-6" /> Shto një admin
                   </button>
@@ -190,9 +193,9 @@ export default function Page() {
                   Veprimet e shpejta
                 </h1>
                 <div className="flex mt-4 space-x-8">
-                  <button
-                    onClick={() => redirect("/admin/newpost")}
-                    className="rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 bg-linear-to-r from-blue-500 to-sky-500"
+                  <a
+                    href="/admin/newpost"
+                    className="rounded-xl h-32 w-72 flex items-center justify-center hover:cursor-pointer hover:brightness-90 bg-linear-to-r from-blue-500 to-sky-500"
                   >
                     <div className="flex flex-col items-center">
                       <FaPlusSquare className="text-white w-8 h-8" />
@@ -200,7 +203,7 @@ export default function Page() {
                         Krijo një postim të ri
                       </span>
                     </div>
-                  </button>
+                  </a>
                   <button className="rounded-xl h-32 w-72 hover:cursor-pointer hover:brightness-90 border-4 border-sky-500">
                     <div className="flex flex-col items-center">
                       <FaListAlt className="text-sky-500 w-8 h-8" />

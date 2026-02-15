@@ -6,13 +6,14 @@ import { useSession } from "next-auth/react";
 import { redirect, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { FaRegSmile, FaSearch } from "react-icons/fa";
-import { FaLink, FaPlus } from "react-icons/fa6";
+import { FaLink, FaPaperPlane, FaPlus, FaRegPaperPlane } from "react-icons/fa6";
 import Loading from "../loading";
 import { LuSend } from "react-icons/lu";
 import Pusher from "pusher-js";
 import EmojiPicker, { EmojiClickData, EmojiStyle } from "emoji-picker-react";
 import Linkify from "linkify-react";
 import { FaFilePdf, FaDownload } from "react-icons/fa6";
+import { IoSend } from "react-icons/io5";
 
 const linkifyOptions = {
   target: "_blank",
@@ -255,7 +256,7 @@ export default function Page() {
             </button>
           </div>
           <div className="flex justify-center mt-3">
-            <label className="input">
+            <label className="input rounded-md">
               <FaSearch />
               <input
                 type="search"
@@ -556,7 +557,7 @@ export default function Page() {
               <FaLink className="w-5 h-5" />
             </button>
             <button
-              className="btn btn-success ml-2"
+              className="btn btn-success ml-2 rounded-full px-2.5 flex items-center justify-center"
               onClick={() => {
                 if (!activeConversation || (!enteredMessage.trim() && !selectedFile)) return;
                 
@@ -574,7 +575,7 @@ export default function Page() {
                 removeSelectedFile();
               }}
             >
-              <LuSend className="w-6 h-6 stroke-white" />
+              <IoSend className="w-5 h-5 stroke-white" />
             </button>
           </div>
         </div>

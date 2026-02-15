@@ -49,7 +49,7 @@ export default function Navbar({ page }: NavbarProps) {
   }, [session]);
 
   const getBtnClass = (btn: "home" | "jobs" | "companies" | "chats" | "none") =>
-    `h-10 btn btn-ghost p-1 flex${
+    `h-10 rounded-md btn btn-ghost p-1 flex${
       page === btn ? " text-blue-700 bg-blue-100 font-bold" : ""
     }`;
 
