@@ -42,7 +42,7 @@ export default function JobSearch({
     <>
       <div className="w-screen h-14 bg-base-200 flex justify-center outline-1 outline-gray-300">
         <div className="flex items-center">
-          <label className="input m-2 whitespace-nowrap w-fit flex items-center">
+          <label className="input m-2 whitespace-nowrap w-fit flex items-center rounded-md">
             <svg
               className="opacity-50 h-5 mr-2"
               xmlns="http://www.w3.org/2000/svg"
@@ -69,11 +69,11 @@ export default function JobSearch({
             />
           </label>
 
-          <label className="input m-2 flex-1 min-w-0 flex items-center">
+          <label className="input m-2 flex-1 min-w-0 flex items-center rounded-md">
             <FaCity className="opacity-50 h-5 w-5 mr-2" />
             <input
               type="search"
-              className="grow min-w-0 bg-transparent focus:outline-none"
+              className="grow min-w-0 bg-transparent focus:outline-non"
               placeholder="Qyteti"
               onChange={(e) => {
                 setSearchCity(e.target.value);

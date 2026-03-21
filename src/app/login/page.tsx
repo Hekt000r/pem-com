@@ -54,6 +54,7 @@ export default function Login() {
         min-w-fit
         w-55
         mt-2
+        rounded-md
         "
               >
                 <FaEnvelope className="w-6 h-6"/>
@@ -87,6 +88,7 @@ export default function Login() {
         gap-3
         min-w-fit
         mt-2
+        rounded-md
         "
               >
                 <FaBuildingUser className="w-6 h-6"/>

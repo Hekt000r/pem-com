@@ -1,7 +1,7 @@
 import "./components.css";
 import { useState } from "react";
 import { IoChatbubbleSharp, IoPersonCircle } from "react-icons/io5";
-import { FaGear, FaBookmark, FaDoorOpen } from "react-icons/fa6";
+import { FaGear, FaBookmark, FaDoorOpen, FaArrowRightFromBracket } from "react-icons/fa6";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 import { FaHome } from "react-icons/fa";
@@ -22,8 +22,8 @@ export default function CompanyAdminNavbar({
   const [isVisible, setIsVisible] = useState(false);
   const { data: session } = useSession();
 
-  const activeBtnClass = `h-10 btn btn-ghost p-1 ml-2 flex text-blue-700 bg-blue-100 font-bold`
-  const inactiveBtnClass = `h-10 btn btn-ghost p-1 ml-2 flex`
+  const activeBtnClass = `h-10 btn btn-ghost rounded-md p-1 ml-2 flex text-blue-700 bg-blue-100 font-bold`
+  const inactiveBtnClass = `h-10 btn btn-ghost rounded-md p-1 ml-2 flex`
 
   const isActive = (page:string) => {
     if (window.location.pathname == page) {
@@ -71,12 +71,12 @@ export default function CompanyAdminNavbar({
         <div className="flex flex-1 justify-end items-end mr-8">
           {session ? (
             <div className="flex relative items-center justify-center h-full">
-              <button className="h-10 btn btn-ghost p-1 flex ml-2 mr-2 items-center justify-center">
+              <button className="h-10 btn btn-ghost p-1 flex border-2 hover:bg-red-50 border-red-300 text-red-800 rounded-md ml-2 mr-2 items-center justify-center">
                 <a
                   href="/home"
                   className="justify-center h-12 flex items-center mr-2"
                 >
-                  <IoPersonCircle className="m-2 w-6 h-6 text-xl" /> Dil prej
+                  <FaArrowRightFromBracket className="m-2 w-5 h-5 text-xl" /> Dil prej
                   Admin
                 </a>
               </button>

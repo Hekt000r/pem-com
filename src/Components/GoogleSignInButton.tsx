@@ -74,6 +74,7 @@ export default function GoogleSignInButton({
         items-center 
         justify-center 
         gap-3
+        rounded-md
         ${variant === "icon-only" ? "w-10" : "min-w-fit"}
       `}
       type="button"
