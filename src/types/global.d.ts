@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { JWT } from "next-auth";
 
 // types/global.d.ts
 declare global {
@@ -146,7 +147,10 @@ declare global {
     senderId: string;
     timestamp: Date;
     attachments: Attachment[];
+    attachment?: Attachment; // legacy
   }
+
+
 
   export interface CustomDecodedToken {
     oauthId: string;
