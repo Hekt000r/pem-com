@@ -1,28 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @import "tailwindcss";
+@import "@heroui/styles";
 
-/* 1. Add daisyUI as a plugin */
-@plugin "daisyui" {
-  themes: light --default;
+.inter-normal {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
-/* 2. Wrap custom variables and overrides in the @theme block or @layer */
-@theme {
-  --font-montserrat: "Montserrat", sans-serif;
+.inter-medium {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
 }
 
-/* 3. Wrap your custom utilities in the utilities layer */
-@layer utilities {
-  .font-legacy-montserrat {
-    font-family: var(--font-montserrat);
-  }
+.inter-semibold {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
 }
 
-/* 4. Global overrides (if needed) */
-@layer base {
-  :root {
-    /* If corners are still square, manually re-assert the daisyUI variable here */
-    --rounded-btn: 0.5rem; 
-  }
+
+
+.button svg {
+  margin-top: 5px;
 }

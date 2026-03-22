@@ -13,7 +13,16 @@ import { IoPersonCircle } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { TbMessageCircleFilled } from "react-icons/tb";
 import { MdAdminPanelSettings } from "react-icons/md";
+import {
+  BriefcaseBusiness,
+  ContactRound,
+  House,
+  LogIn,
+  MessageCircle,
+} from "lucide-react";
+import { Button } from "@heroui/react";
 import axios from "axios";
+import Link from "next/link";
 
 type NavbarProps = {
   page: "home" | "jobs" | "companies" | "chats" | "none";
@@ -25,6 +34,12 @@ export default function Navbar({ page }: NavbarProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     const fetchAdminStatus = async () => {
       if (!session?.user?.oauthId) return;
@@ -32,7 +47,7 @@ export default function Navbar({ page }: NavbarProps) {
       try {
         /* normal admin status */
         const res = await axios.get(
-          `/api/getUserAdminCompany?oid=${session.user.oauthId}`
+          `/api/getUserAdminCompany?oid=${session.user.oauthId}`,
         );
         setIsAdmin(res.data.isAdmin);
 
@@ -53,34 +68,41 @@ export default function Navbar({ page }: NavbarProps) {
       page === btn ? " text-blue-700 bg-blue-100 font-bold" : ""
     }`;
 
+  const isActive = (btn: "home" | "jobs" | "companies" | "chats" | "none") =>
+    page === btn ? "primary" : "outline";
+
   return (
     <>
       <div className="h-14 flex shadow-xl bg-white">
         <div className="h-12 flex w-full m-1 p-1">
-          <button className="h-10 btn btn-ghost p-1 flex">
+          <a href="/" className="h-10 w-80 hover:bg-gray-200 hover:border-gray-300 hover:border rounded-xl p-2 cursor-pointer flex items-center justify-center">
             <img src="/Logo1.svg" className="h-10" alt="" />
-          </button>
-          <div className="flex h-10 ml-3 w-full justify-center items-center mr-[15%]">
-            <a href="/home" className={getBtnClass("home")}>
-              <h1 className="justify-center h-12 flex items-center mr-2">
-                <FaHome className="m-2 text-xl" /> Ballina
-              </h1>
-            </a>
-            <a href="/jobs" className={getBtnClass("jobs") + " ml-2"}>
-              <h1 className="justify-center h-12 flex items-center mr-2">
-                <FaAddressCard className="m-2 text-xl" /> Punët
-              </h1>
-            </a>
-            <button className={getBtnClass("companies") + " ml-2"}>
-              <h1 className="justify-center h-12 flex items-center mr-2">
-                <FaBriefcase className="m-2 text-xl" /> Kompanitë
-              </h1>
-            </button>
-            <a href="/chats" className={getBtnClass("chats") + " ml-2"}>
-              <h1 className="justify-center h-12 flex items-center mr-2">
-                <TbMessageCircleFilled className="m-2 text-xl" /> Bisedimet
-              </h1>
-            </a>
+          </a>
+          <div className="flex space-x-2 h-10 ml-3 w-full justify-center items-center mr-[15%]">
+            <Link href="/home">
+              <Button variant={isActive("home")} className="items-center">
+                <House className="" />
+                <span className="leading-none">Ballina</span>
+              </Button>
+            </Link>
+            <Link href="/jobs">
+              <Button variant={isActive("jobs")} className="items-center">
+                <ContactRound className="" />
+                <span className="leading-none">Punët</span>
+              </Button>
+            </Link>
+            <Link href="/companies">
+              <Button variant={isActive("companies")} className="items-center">
+                <BriefcaseBusiness className="" />
+                <span className="leading-none">Kompanitë</span>
+              </Button>
+            </Link>
+            <Link href="/chats">
+              <Button variant={isActive("chats")} className="items-center">
+                <MessageCircle className="" />
+                <span className="leading-none">Bisedimet</span>
+              </Button>
+            </Link>
           </div>
 
           <div className="flex h-10 w-full justify-end items-center mr-[15%]">
@@ -157,12 +179,12 @@ export default function Navbar({ page }: NavbarProps) {
                 </div>
               </div>
             ) : (
-              <a
-                href="/login"
-                className="py-2 px-6 rounded-lg cursor-pointer bg-sky-600 hover:bg-sky-700 text-white font-semibold"
-              >
-                Kyçu
-              </a>
+              <Link href="/login">
+                <Button className="items-center">
+                  <LogIn className="" />
+                  <span className="leading-none">Kyçu</span>
+                </Button>
+              </Link>
             )}
           </div>
         </div>
